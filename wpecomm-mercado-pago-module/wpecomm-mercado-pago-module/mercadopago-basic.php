@@ -16,12 +16,11 @@ if ( !defined( 'ABSPATH' ) ) {
 }
 
 include_once "mercadopago-lib/mercadopago.php";
-include_once "mercadopago-lib/MPApi.php";
 
 $nzshpcrt_gateways[$num] = array(
-	'name' =>  __( 'Mercado Pago Basic Checkout', 'wpecomm-mercadopago-module' ),
+	'name' =>  __( 'Mercado Pago - Basic Checkout', 'wpecomm-mercadopago-module' ),
 	'class_name' => 'WPSC_Merchant_MercadoPago_Basic',
-	'display_name' => __( 'Mercado Pago Basic Checkout', 'wpecomm-mercadopago-module' ),
+	'display_name' => __( 'Mercado Pago - Basic Checkout', 'wpecomm-mercadopago-module' ),
 	'requirements' => array(
 		/// so that you can restrict merchant modules to PHP 5, if you use PHP 5 features
 		'php_version' => 5.6,
@@ -39,11 +38,11 @@ $nzshpcrt_gateways[$num] = array(
 class WPSC_Merchant_MercadoPago_Basic extends wpsc_merchant {
 
 	function __construct() {
-		add_action( 'init', array( $this, 'load_plugin_textdomain_mp' ) );
+		add_action( 'init', array( $this, 'load_plugin_textdomain_wpecomm' ) );
 	}
 
 	// Multi-language plugin
-	function load_plugin_textdomain_mp() {
+	function load_plugin_textdomain_wpecomm() {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'wpecomm-mercadopago-module' );
 		load_textdomain(
 			'wpecomm-mercadopago-module',
@@ -64,10 +63,10 @@ function submit_mercadopago_basic() {
 	if (isset($_POST['mercadopago_certified_clientid'])) {
 		update_option('mercadopago_certified_clientid', trim($_POST['mercadopago_certified_clientid']));
 	}
-	if ($_POST['mercadopago_certified_clientsecret'] != null) {
+	if (isset($_POST['mercadopago_certified_clientsecret'])) {
 		update_option('mercadopago_certified_clientsecret', trim($_POST['mercadopago_certified_clientsecret']));
 	}
-	if ($_POST['mercadopago_certified_siteid'] != null) {
+	if (isset($_POST['mercadopago_certified_siteid'])) {
 		update_option('mercadopago_certified_siteid', trim($_POST['mercadopago_certified_siteid']));
 	}
 	// TODO: find a better way to pass translated fields to customer view
@@ -95,22 +94,22 @@ function submit_mercadopago_basic() {
 	if (isset($_POST['mercadopago_certified_url_pending'])) {
 		update_option('mercadopago_certified_url_pending', trim($_POST['mercadopago_certified_url_pending']));
 	}
-	if ($_POST['mercadopago_certified_istestuser'] != null) {
+	if (isset($_POST['mercadopago_certified_istestuser'])) {
 		update_option('mercadopago_certified_istestuser', trim($_POST['mercadopago_certified_istestuser']));
 	}
-	if ($_POST['mercadopago_certified_currencyratio'] != null) {
+	if (isset($_POST['mercadopago_certified_currencyratio'])) {
 		update_option('mercadopago_certified_currencyratio', trim($_POST['mercadopago_certified_currencyratio']));
 	}
-	if ($_POST['mercadopago_certified_description'] != null) {
+	if (isset($_POST['mercadopago_certified_description'])) {
 		update_option('mercadopago_certified_description', trim($_POST['mercadopago_certified_description']));
 	}
-	if ($_POST['mercadopago_certified_category'] != null) {
+	if (isset($_POST['mercadopago_certified_category'])) {
 		update_option('mercadopago_certified_category', trim($_POST['mercadopago_certified_category']));
 	}
-	if ($_POST['mercadopago_certified_invoiceprefix'] != null) {
+	if (isset($_POST['mercadopago_certified_invoiceprefix'])) {
 		update_option('mercadopago_certified_invoiceprefix', trim($_POST['mercadopago_certified_invoiceprefix']));
 	}
-	if ($_POST['mercadopago_certified_typecheckout'] != null) {
+	if (isset($_POST['mercadopago_certified_typecheckout'])) {
 		update_option('mercadopago_certified_typecheckout', trim($_POST['mercadopago_certified_typecheckout']));
 	}
 	if (isset($_POST['mercadopago_certified_iframewidth'])) {
@@ -119,13 +118,13 @@ function submit_mercadopago_basic() {
 	if (isset($_POST['mercadopago_certified_iframeheight'])) {
 		update_option('mercadopago_certified_iframeheight', trim($_POST['mercadopago_certified_iframeheight']));
 	}
-	if ($_POST['mercadopago_certified_autoreturn'] != null) {
+	if (isset($_POST['mercadopago_certified_autoreturn'])) {
 		update_option('mercadopago_certified_autoreturn', trim($_POST['mercadopago_certified_autoreturn']));
 	}
-	if ($_POST['mercadopago_certified_currencyconversion'] != null) {
+	if (isset($_POST['mercadopago_certified_currencyconversion'])) {
 		update_option('mercadopago_certified_currencyconversion', trim($_POST['mercadopago_certified_currencyconversion']));
 	}
-	if ($_POST['mercadopago_certified_maxinstallments'] != null) {
+	if (isset($_POST['mercadopago_certified_maxinstallments'])) {
 		update_option('mercadopago_certified_maxinstallments', trim($_POST['mercadopago_certified_maxinstallments']));
 	}
 	/*if (isset($_POST['mercadopago_certified_exmethods']) && isset($_POST['mercadopago_certified_paymentmethods'])) {
@@ -147,10 +146,10 @@ function submit_mercadopago_basic() {
 	} else {
 		update_option('mercadopago_certified_exmethods', '');
 	}
-	if ($_POST['mercadopago_certified_sandbox'] != null) {
+	if (isset($_POST['mercadopago_certified_sandbox'])) {
 		update_option('mercadopago_certified_sandbox', trim($_POST['mercadopago_certified_sandbox']));
 	}
-	if ($_POST['mercadopago_certified_debug'] != null) {
+	if (isset($_POST['mercadopago_certified_debug'])) {
 		update_option('mercadopago_certified_debug', trim($_POST['mercadopago_certified_debug']));
 	}
 	return true;
@@ -219,13 +218,13 @@ function form_mercadopago_basic() {
 	}
 
 	$api_secret_locale = sprintf(
-		'<a href="https://www.mercadopago.com/mla/account/credentials?type=custom" target="_blank">%s</a>, ' .
-		'<a href="https://www.mercadopago.com/mlb/account/credentials?type=custom" target="_blank">%s</a>, ' .
-		'<a href="https://www.mercadopago.com/mlc/account/credentials?type=custom" target="_blank">%s</a>, ' .
-		'<a href="https://www.mercadopago.com/mco/account/credentials?type=custom" target="_blank">%s</a>, ' .
-		'<a href="https://www.mercadopago.com/mlm/account/credentials?type=custom" target="_blank">%s</a>, ' .
-		'<a href="https://www.mercadopago.com/mpe/account/credentials?type=custom" target="_blank">%s</a> %s ' .
-		'<a href="https://www.mercadopago.com/mlv/account/credentials?type=custom" target="_blank">%s</a>',
+		'<a href="https://www.mercadopago.com/mla/account/credentials?type=basic" target="_blank">%s</a>, ' .
+		'<a href="https://www.mercadopago.com/mlb/account/credentials?type=basic" target="_blank">%s</a>, ' .
+		'<a href="https://www.mercadopago.com/mlc/account/credentials?type=basic" target="_blank">%s</a>, ' .
+		'<a href="https://www.mercadopago.com/mco/account/credentials?type=basic" target="_blank">%s</a>, ' .
+		'<a href="https://www.mercadopago.com/mlm/account/credentials?type=basic" target="_blank">%s</a>, ' .
+		'<a href="https://www.mercadopago.com/mpe/account/credentials?type=basic" target="_blank">%s</a> %s ' .
+		'<a href="https://www.mercadopago.com/mlv/account/credentials?type=basic" target="_blank">%s</a>',
 		__( 'Argentine', 'wpecomm-mercadopago-module' ),
 		__( 'Brazil', 'wpecomm-mercadopago-module' ),
 		__( 'Chile', 'wpecomm-mercadopago-module' ),
@@ -933,8 +932,8 @@ function category() {
 	$category = get_option('mercadopago_certified_category');
 	$category = $category === false || is_null($category) ? "others" : $category;
 	// category marketplace
-	$mp = new MPApi();
-	$list_category = $mp->getCategories();
+	$list_category = MPRestClient::get( array( "uri" => "/item_categories" ) );
+	$list_category = $list_category["response"];
 	$select_category = '<select name="mercadopago_certified_category" id="category" style="max-width:600px;>';
 	foreach ($list_category as $category_arr) :
 		$selected = "";
@@ -1036,12 +1035,12 @@ function validateCredentials($client_id, $client_secret) {
 		try {
 			$mp = new MP($client_id, $client_secret);
 			$result['access_token'] = $mp->get_access_token();
-			$mpApi = new MPApi();
-			$get_request = $mpApi->getMe($result['access_token']);
+			$get_request = $mp->get( "/users/me?access_token=" . $result['access_token'] );
 			if (isset($get_request['response']['site_id'])) {
 				$result['is_test_user'] = in_array('test_user', $get_request['response']['tags']) ? "yes" : "no";
 				$result['site_id'] = $get_request['response']['site_id'];
-				$payment_methods = $mpApi->getPaymentMethods($result['site_id']);
+				$payment_methods = $mp->get( "/v1/payment_methods/?access_token=" . $result['access_token'] );
+				$payment_methods = $payment_methods["response"];
 				$arr = array();
 				foreach ($payment_methods as $payment) {
 					$arr[] = $payment['id'];
@@ -1049,10 +1048,25 @@ function validateCredentials($client_id, $client_secret) {
 				$result['payment_methods'] = $payment_methods;
 				$result['all_payment_methods'] = implode(",", $arr);
 				// check for auto converstion of currency
-				$result['currency_ratio'] = $mpApi->getCurrencyRatio(
-					WPSC_Countries::get_currency_code(absint(get_option('currency_type'))),
-					getCurrencyId($result['site_id'])
-				);
+				$result['currency_ratio'] = -1;
+				if ( get_option('mercadopago_certified_currencyconversion') == "active" ) {
+					$currency_obj = MPRestClient::get_ml( array( "uri" =>
+						"/currency_conversions/search?from=" .
+						WPSC_Countries::get_currency_code(absint(get_option('currency_type'))) .
+						"&to=" .
+						getCurrencyId( $result['site_id'] )
+					) );
+					if ( isset( $currency_obj[ 'response' ] ) ) {
+						$currency_obj = $currency_obj[ 'response' ];
+						if ( isset( $currency_obj['ratio'] ) ) {
+							$result['currency_ratio'] = (float) $currency_obj['ratio'];
+						} else {
+							$result['currency_ratio'] = -1;
+						}
+					} else {
+						$result['currency_ratio'] = -1;
+					}
+				}
 				$result['is_valid'] = true;
 				return $result;
 			} else {
