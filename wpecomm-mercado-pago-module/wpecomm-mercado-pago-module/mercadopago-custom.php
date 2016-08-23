@@ -71,13 +71,13 @@ function submit_mercadopago_custom() {
 		update_option('mercadopago_custom_siteid', trim($_POST['mercadopago_custom_siteid']));
 	}
 	// TODO: find a better way to pass translated fields to customer view
-	/*if (isset($_POST['mercadopago_custom_checkoutmessage1'])) {
+	if (isset($_POST['mercadopago_custom_checkoutmessage1'])) {
 		update_option('mercadopago_custom_checkoutmessage1', trim($_POST['mercadopago_custom_checkoutmessage1']));
 	}
 	if (isset($_POST['mercadopago_custom_checkoutmessage2'])) {
 		update_option('mercadopago_custom_checkoutmessage2', trim($_POST['mercadopago_custom_checkoutmessage2']));
 	}
-	if (isset($_POST['mercadopago_custom_checkoutmessage3'])) {
+	/*if (isset($_POST['mercadopago_custom_checkoutmessage3'])) {
 		update_option('mercadopago_custom_checkoutmessage3', trim($_POST['mercadopago_custom_checkoutmessage3']));
 	}
 	if (isset($_POST['mercadopago_custom_checkoutmessage4'])) {
@@ -147,7 +147,7 @@ function form_mercadopago_custom() {
 	);
 	$store_currency = WPSC_Countries::get_currency_code(absint(get_option('currency_type')));
 
-	// Trigger API to get payment methods and site_id, also validates Client_id/Client_secret.
+	// Trigger API to get payment methods and site_id, also validates Public_key/Access_token.
 	$currency_message = "";
 	if ($result['is_valid'] == true) {
 		try {
@@ -236,6 +236,12 @@ function form_mercadopago_custom() {
 		</td>
 		<td>
 			<input type='hidden' size='60' value='" . $result['site_id'] . "' name='mercadopago_custom_siteid' />
+			<input type='hidden' size='60' value='" .
+				__( 'Tax fees applicable in store', 'wpecomm-mercadopago-module' ) .
+				"' name='mercadopago_custom_checkoutmessage1' />
+			<input type='hidden' size='60' value='" .
+				__( 'Shipping service used by store', 'wpecomm-mercadopago-module' ) .
+				"' name='mercadopago_custom_checkoutmessage2' />
 			<input type='hidden' size='60' value='" . $result['is_test_user'] . "' name='mercadopago_custom_istestuser' />
 			<input type='hidden' size='60' value='" . $result['currency_ratio'] . "' name='mercadopago_custom_currencyratio' />
 			<p><a href='https://wordpress.org/support/view/plugin-reviews/wpecomm-mercado-pago-module?filter=5#postform' target='_blank' class='button button-primary'>" . sprintf(
@@ -399,7 +405,7 @@ function form_mercadopago_custom() {
 	FUNCTIONS TO PROCESS PAYMENT
 ================================================================================*/
 
-/*function function_mercadopago_basic($seperator, $sessionid) {
+function function_mercadopago_custom($seperator, $sessionid) {
 
 	global $wpdb, $wpsc_cart;
 
@@ -424,8 +430,9 @@ function form_mercadopago_custom() {
 		$arr_info[$value['unique_name']] = $value['value'];
 	}
 
-	// products
+	// Here we build the array that contains ordered itens, from customer cart
 	$items = array();
+	$purchase_description = "";
 	if (sizeof($wpsc_cart->cart_items) > 0) {
 		foreach ($wpsc_cart->cart_items as $i => $item) {
 			if ($item->quantity > 0) {
@@ -439,6 +446,9 @@ function form_mercadopago_custom() {
 						}
 					}
 				}
+				$purchase_description =
+					$purchase_description . ' ' .
+					( $item->product_name . ' x ' . $item->quantity );
 				array_push($items, array(
 					'id' => $item->product_id,
 					'title' => ( $item->product_name . ' x ' . $item->quantity ),
@@ -457,11 +467,11 @@ function form_mercadopago_custom() {
 					) * (
 						(float)get_option('mercadopago_custom_currencyratio') > 0 ?
 						(float)get_option('mercadopago_custom_currencyratio') : 1
-					),
-					'currency_id' => getCurrencyId(get_option('mercadopago_custom_siteid'))
+					)
 				));
 			}
 		}
+
 		// tax fees cost as an item
 		array_push($items, array(
 			'title' => get_option('mercadopago_custom_checkoutmessage1'),
@@ -473,9 +483,9 @@ function form_mercadopago_custom() {
 			) * (
 				(float)get_option('mercadopago_custom_currencyratio') > 0 ?
 				(float)get_option('mercadopago_custom_currencyratio') : 1
-			),
-			'currency_id' => getCurrencyId(get_option('mercadopago_custom_siteid'))
+			)
 		));
+
 		// shipment cost as an item
 		array_push($items, array(
 			'title' => $wpsc_cart->selected_shipping_option,
@@ -487,37 +497,118 @@ function form_mercadopago_custom() {
 			) * (
 				(float)get_option('mercadopago_custom_currencyratio') > 0 ?
 				(float)get_option('mercadopago_custom_currencyratio') : 1
-			),
-			'currency_id' => getCurrencyId(get_option('mercadopago_custom_siteid'))
+			)
 		));
 	}
 
-	// Find excluded payment methods
-	$excluded_payment_string = get_option('mercadopago_custom_exmethods');
-	if ($excluded_payment_string != '') {
-		$excluded_payment_methods = array();
-  	$excluded_payment_string = explode(',', $excluded_payment_string);
-  	foreach ($excluded_payment_string as $exclude ) {
-			if ($exclude != "") {
-				array_push( $excluded_payment_methods, array(
-    			"id" => $exclude
-	    	));
-	    }
+	// Build additional information from the customer data
+	$billing_details = wpsc_get_customer_meta();
+	$order_id = $billing_details['_wpsc_cart.log_id'][0];
+  $payer_additional_info = array(
+    'first_name' => $arr_info['billingfirstname'],
+    'last_name' => $arr_info['billinglastname'],
+    //'registration_date' =>
+    'phone'	=> array(
+  	//'area_code' =>
+			'number' => $arr_info['billingphone']
+		),
+      'address' => array(
+			'zip_code' => $arr_info['billingpostcode'],
+			//'street_number' =>
+			'street_name' => $arr_info['billingaddress'] . ' / ' .
+				$arr_info['billingcity'] . ' ' .
+				$arr_info['billingstate'] . ' ' .
+				$arr_info['billingcountry']
+		)
+  );
+
+  // Create the shipment address information set
+  $shipments = array(
+  	'receiver_address' => array(
+  		'zip_code' => $arr_info['shippingpostcode'],
+  		//'street_number' =>
+  		'street_name' => $arr_info['shippingaddress'] . ' ' .
+  			$arr_info['shippingcity'] . ' ' .
+  			$arr_info['shippingstate'] . ' ' .
+  			$arr_info['shippingcountry'],
+  		//'floor' =>
+  		'apartment' => $arr_info['shippingfirstname']
+  	)
+  );
+
+  // The payment preference
+  $payment_preference = array (
+  	'transaction_amount' => (float) number_format( $wpsc_cart->calculate_total_price() * (
+			(float)get_option('mercadopago_custom_currencyratio') > 0 ?
+			(float)get_option('mercadopago_custom_currencyratio') : 1
+		), 2 ),
+  	//'token' => $post_from_form[ 'mercadopago_custom' ][ 'token' ],
+  	'description' => $purchase_description,
+  	//'installments' => (int) $post_from_form[ 'mercadopago_custom' ][ 'installments' ],
+    //'payment_method_id' => $post_from_form[ 'mercadopago_custom' ][ 'paymentMethodId' ],
+    'payer' => array(
+    	'email' => $arr_info['billingemail']
+    ),
+    'external_reference' => get_option('mercadopago_custom_invoiceprefix') . $order_id,
+    'statement_descriptor' => get_option('mercadopago_custom_statementdescriptor'),
+    'binary_mode' => (get_option('mercadopago_custom_binary') == "active"),
+    'additional_info' => array(
+        'items' => $items,
+        'payer' => $payer_additional_info,
+        'shipments' => $shipments
+    )
+  );
+
+  // Set sponsor ID
+	if ( get_option('mercadopago_custom_istestuser') == "no" ) {
+		switch (get_option('mercadopago_custom_siteid')) {
+			case 'MLA':
+				$sponsor_id = 219693774;
+				break;
+			case 'MLB':
+				$sponsor_id = 219691508;
+				break;
+			case 'MLC':
+				$sponsor_id = 219691655;
+				break;
+			case 'MCO':
+				$sponsor_id = 219695429;
+				break;
+			case 'MLM':
+				$sponsor_id = 219696864;
+				break;
+			case 'MPE':
+				$sponsor_id = 219692012;
+				break;
+			case 'MLV':
+				$sponsor_id = 219696139;
+				break;
+			default:
+				$sponsor_id = null;
 		}
-		$payment_methods = array(
-			"installments" => (int)get_option('mercadopago_custom_maxinstallments'),
-			"excluded_payment_methods" => $excluded_payment_methods,
-			'default_installments' => 1
-		);
-	} else {
-		$payment_methods = array(
-			"installments" => (int)get_option('mercadopago_custom_maxinstallments'),
-			'default_installments' => 1
-		);
+		if ($sponsor_id != null)
+			$payment_preference[ 'sponsor_id' ] = $sponsor_id;
 	}
 
+  //=============================================================================
+
+  /*
+  // Customer's Card Feature, add only if it has issuer id
+  if ( array_key_exists( 'token', $post_from_form[ 'mercadopago_custom' ] ) ) {
+  	$payment_preference[ 'metadata' ][ 'token' ] = $post_from_form[ 'mercadopago_custom' ][ 'token' ];
+      if ( array_key_exists( 'issuer', $post_from_form[ 'mercadopago_custom' ] ) ) {
+      	if ( !empty( $post_from_form[ 'mercadopago_custom' ][ 'issuer' ] ) ) {
+      		$payment_preference[ 'issuer_id' ] = (integer) $post_from_form[ 'mercadopago_custom' ][ 'issuer' ];
+      	}
+      }
+      if ( !empty( $post_from_form[ 'mercadopago_custom' ][ 'CustomerId' ] ) ) {
+  		$payment_preference[ 'payer' ][ 'id' ] = $post_from_form[ 'mercadopago_custom' ][ 'CustomerId' ];
+  	}
+	}
+  */
+
 	// create Mercado Pago preference
-	$billing_details = wpsc_get_customer_meta();
+	/*$billing_details = wpsc_get_customer_meta();
 	$order_id = $billing_details['_wpsc_cart.log_id'][0];
 	$preferences = array(
 		'items' => $items,
@@ -564,97 +655,77 @@ function form_mercadopago_custom() {
     //'expires' =>
     //'expiration_date_from' =>
     //'expiration_date_to' =>
-	);
+	);*/
 
 	// Do not set IPN url if it is a localhost!
-  $notification_url = get_site_url() . '/wpecomm-mercadopago-module/?wc-api=WC_WPeCommMercadoPago_Gateway';
+  /*$notification_url = get_site_url() . '/wpecomm-mercadopago-module/?wc-api=WC_WPeCommMercadoPago_Gateway';
   if ( !strrpos( $notification_url, "localhost" ) ) {
       $preferences['notification_url'] = workaroundAmperSandBug( $notification_url );
-  }
-	// Set sponsor ID
-	if ( get_option('mercadopago_custom_istestuser') == "no" ) {
-		switch (get_option('mercadopago_custom_siteid')) {
-			case 'MLA':
-				$sponsor_id = 219693774;
-				break;
-			case 'MLB':
-				$sponsor_id = 219691508;
-				break;
-			case 'MLC':
-				$sponsor_id = 219691655;
-				break;
-			case 'MCO':
-				$sponsor_id = 219695429;
-				break;
-			case 'MLM':
-				$sponsor_id = 219696864;
-				break;
-			case 'MPE':
-				$sponsor_id = 219692012;
-				break;
-			case 'MLV':
-				$sponsor_id = 219696139;
-				break;
-			default:
-				$sponsor_id = null;
-		}
-		if ($sponsor_id != null)
-			$preferences[ 'sponsor_id' ] = $sponsor_id;
-	}
-
-	// auto return options
-	if ( get_option('mercadopago_custom_autoreturn') == "active" ) {
-		$preferences[ 'auto_return' ] = "approved";
-	}
+  }*/
 
 	// log created preferences
 	if ( get_option('mercadopago_custom_debug') == "Yes" ) {
 		debug_to_console_custom(
 			"@" . __FUNCTION__ . " - " .
 			"Preferences created, now processing it: " .
-			json_encode($preferences, JSON_PRETTY_PRINT)
+			json_encode($payment_preference, JSON_PRETTY_PRINT)
 		);
 	}
 
-	process_payment($preferences, $wpsc_cart);
-
+	draw_payment_form_wpecomm_mp_custom($payment_preference, $wpsc_cart);
 }
 
-function process_payment($preferences, $wpsc_cart) {
+function draw_payment_form_wpecomm_mp_custom($preferences, $wpsc_cart) {
 
 	$mp = new MP(
-		get_option('mercadopago_custom_publickey'),
 		get_option('mercadopago_custom_accesstoken')
 	);
-	$access_token = $mp->get_access_token();
 	$isTestUser = get_option('mercadopago_custom_istestuser');
 
-	// trigger API to create payment
-	$preferenceResult = $mp->create_preference($preferences);
-	if ($preferenceResult['status'] == 201) {
-		if (get_option('mercadopago_custom_sandbox') == "active") {
-			$link = $preferenceResult['response']['sandbox_init_point'];
-		} else {
-			$link = $preferenceResult['response']['init_point'];
-		}
+	// Checks for sandbox mode
+	if ( 'active' == get_option('mercadopago_custom_sandbox') ) {
+		$mp->sandbox_mode( true );
 	} else {
-		// TODO: create a better user feedback...
-		echo "Error: " . $preferenceResult['status'];
+		$mp->sandbox_mode( false );
 	}
 
-	// build payment banner url
-	$banners_mercadopago_standard = array(
-	  "MLA" => 'MLA/standard.jpg',
-	  "MLB" => 'MLB/standard.jpg',
-	  "MCO" => 'MCO/standard.jpg',
-	  "MLC" => 'MLC/standard.gif',
-		"MPE" => 'MPE/standard.png',
-    "MLV" => 'MLV/standard.jpg',
-    "MLM" => 'MLM/standard.jpg'
-  );
-  $html =
-		'<img alt="Mercado Pago" title="Mercado Pago" width="468" height="60" src="' .
-		plugins_url( 'wpsc-merchants/mercadopago-images/' . $banners_mercadopago_standard[get_option('mercadopago_custom_siteid')], plugin_dir_path( __FILE__ ) ) . '">';
+	// trigger API to create payment
+	$html = "";
+	$checkout_info = null;
+	try {
+		// Create order preferences with Mercado Pago API request
+		/*$checkout_info = $mp->post( "/v1/payments", json_encode( $preferences ) );
+		if ( is_wp_error( $checkout_info ) ||
+			$checkout_info[ 'status' ] < 200 || $checkout_info[ 'status' ] >= 300 ) {
+			$html .= print_r( $checkout_info[ 'response' ], true );
+			// TODO: what should we do here?
+		} else {*/
+			// build payment banner url
+			$banners_mercadopago_standard = array(
+			  "MLA" => 'MLA/standard.jpg',
+			  "MLB" => 'MLB/standard.jpg',
+			  "MCO" => 'MCO/standard.jpg',
+			  "MLC" => 'MLC/standard.gif',
+				"MPE" => 'MPE/standard.png',
+		    "MLV" => 'MLV/standard.jpg',
+		    "MLM" => 'MLM/standard.jpg'
+		  );
+			$banner_path = plugins_url( 'wpsc-merchants/mercadopago-images/' .
+				$banners_mercadopago_standard[get_option('mercadopago_custom_siteid')], plugin_dir_path( __FILE__ ) );
+			$html .= '<div width="100%" style="margin:1px; padding:36px 36px 16px 36px; background:white; ">
+				<img class="logo" src=' . plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) . '
+				" width="156" height="40" />
+				<img alt="Mercado Pago" title="Mercado Pago" class="mp-creditcard-banner" src="' . $banner_path . '" width="312" height="40" />
+			</div>';
+			$html .= '<h3>' . get_option('mercadopago_custom_checkoutmessage3') . '</h3>';
+			//$checkout_info[ 'response' ];
+		//}
+	} catch ( MercadoPagoException $e ) {
+		// TODO: what should we do here?
+	}
+
+
+  /*
 
 	if ($link) {
 		// build payment button html code
@@ -695,22 +766,23 @@ function process_payment($preferences, $wpsc_cart) {
 	} else {
 		$html =
 			'<p>' . get_option('mercadopago_custom_checkoutmessage6') . '</p>';
-	}
+	}*/
 
 	// show page
 	get_header();
-	$page = '<div style="position: relative; margin: 20px 0;" >';
-		$page .= '<div style="margin: 0 auto; width: 1080px; ">';
-			$page .= '<h3>' . get_option('mercadopago_custom_checkoutmessage3') . '</h3>';
-			$page .= $html;
-		$page .= '</div>';
-	$page .= '</div>';
-	echo $page;
+		//$page = '<div style="position: relative; margin: 20px 0;" >';
+		//$page .= '<div style="margin: 0 auto; width: 1080px; ">';
+			//$page .= '<h3>' . get_option('mercadopago_custom_checkoutmessage3') . '</h3>';
+			//$page .= $html;
+		//$page .= '</div>';
+		//$page .= '</div>';
+		//echo $page;
+		echo $html;
 	get_footer();
 
 	exit;
 
-}*/
+}
 
 /*===============================================================================
 	FUNCTIONS TO GENERATE VIEWS

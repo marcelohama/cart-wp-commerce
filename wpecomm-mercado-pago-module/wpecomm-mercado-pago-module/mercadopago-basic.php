@@ -716,11 +716,11 @@ function function_mercadopago_basic($seperator, $sessionid) {
 		);
 	}
 
-	process_payment($preferences, $wpsc_cart);
+	process_payment_wpecomm_mp_basic($preferences, $wpsc_cart);
 
 }
 
-function process_payment($preferences, $wpsc_cart) {
+function process_payment_wpecomm_mp_basic($preferences, $wpsc_cart) {
 
 	$mp = new MP(
 		get_option('mercadopago_certified_clientid'),
