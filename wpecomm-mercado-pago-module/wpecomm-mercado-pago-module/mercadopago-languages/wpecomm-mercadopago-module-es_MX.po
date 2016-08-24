@@ -14,12 +14,6 @@ msgstr ""
 "Language-Team: \n"
 "Language: es_MX\n"
 
-msgid "Mercado Pago - Basic Checkout"
-msgstr "Mercado Pago - Checkout Básico"
-
-msgid "Mercado Pago - Credit Card"
-msgstr "Mercado Pago - Tarjeta de Crédito"
-
 msgid "Mercado Pago Basic Checkout"
 msgstr "Checkout Básico Mercado Pago"
 
@@ -30,7 +24,7 @@ msgid "Please, rate us %s on WordPress.org and give your feedback to help improv
 msgstr "Por favor, califíquenos con %s en WordPress.org y de su feedback para ayudar a mejorar este módulo!"
 
 msgid "Your credentials are <strong>valid</strong> for"
-msgstr "Sus credenciales <strong>son válidas</strong> para"
+msgstr "Sus credenciales <strong>son válidas</strong> para\""
 
 msgid "Your credentials are <strong>not valid</strong>!"
 msgstr "Sus credenciales <strong>no son válidas</strong>!"
@@ -241,33 +235,3 @@ msgstr "Pagar con Mercado Pago"
 
 msgid "An error occurred when proccessing your payment. Please try again or contact us for assistence."
 msgstr "Se ha producido un error en el procesamiento de su pago. Por favor, inténtelo de nuevo o póngase en contacto con nosotros para Asistencia."
-
-msgid "Public Key"
-msgstr "Public Key"
-
-msgid "Access Token"
-msgstr "Access Token"
-
-msgid "Insert your Mercado Pago Public key."
-msgstr "Inserte su Public Key de Mercado Pago."
-
-msgid "Insert your Mercado Pago Access token."
-msgstr "Inserte su Access Token de Mercado Pago."
-
-msgid "Binary Mode"
-msgstr "Modo Binario"
-
-msgid "When charging a credit card, only [approved] or [reject] status will be taken."
-msgstr "Al cargar una tarjeta de crédito, sólo los estados [aprobado] o [rechazar] seran tomados."
-
-msgid "Coupons"
-msgstr "Cupones"
-
-msgid "If there is a Mercado Pago campaign, allow your store to give discounts to customers."
-msgstr "Si hay una campaña de Mercado Pago, permitir a su tienda hacer descuentos para los clientes."
-
-msgid "Statement Descriptor"
-msgstr "Descripción de la Factura"
-
-msgid "The description that will be shown in your customer's invoice."
-msgstr "La descripción que se muestra en la factura de su cliente."

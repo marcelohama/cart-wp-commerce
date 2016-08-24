@@ -4,7 +4,7 @@ Donate link: https://www.mercadopago.com.br/developers/
 Tags: ecommerce, mercadopago, wpecommerce
 Requires at least: WP-eCommerce 3.11.x
 Tested up to: WP-eCommerce 3.11.x
-Stable tag: 4.0.1
+Stable tag: 4.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -96,7 +96,9 @@ Please, check our FAQ at: https://www.mercadopago.com.br/ajuda/
 
 == Screenshots ==
 
-1. `Configuration of Basic Checkout`
+1. `Basic Checkout`
+
+2. `Configuration of Basic Checkout`
 
 == Changelog ==
 
