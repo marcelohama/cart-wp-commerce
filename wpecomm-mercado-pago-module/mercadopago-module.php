@@ -53,6 +53,14 @@ class WPeComm_MercadoPago_Module {
         $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-lib'
       );
       copy(
+        plugin_dir_path( __FILE__ ) . 'wpecomm-mercado-pago-module/mercadopago-ticket.php',
+        $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-ticket.php'
+      );
+      copy(
+        plugin_dir_path( __FILE__ ) . 'wpecomm-mercado-pago-module/mercadopago-custom.php',
+        $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-custom.php'
+      );
+      copy(
         plugin_dir_path( __FILE__ ) . 'wpecomm-mercado-pago-module/mercadopago-basic.php',
         $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-basic.php'
       );
@@ -69,6 +77,12 @@ class WPeComm_MercadoPago_Module {
 	  if ( file_exists( $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-basic.php' ) ) {
 			unlink( $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-basic.php' );
 	  }
+    if ( file_exists( $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-custom.php' ) ) {
+      unlink( $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-custom.php' );
+    }
+    if ( file_exists( $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-ticket.php' ) ) {
+      unlink( $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-ticket.php' );
+    }
     if ( file_exists( $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-lib' ) ) {
       $this->deleteDir( $this->fs_get_wp_config_path() . '/plugins/wp-e-commerce/wpsc-merchants/mercadopago-lib' );
     }
@@ -161,14 +175,14 @@ function wpecomm_mercadopago_settings_link( $links ) {
 		'options-general.php?page=wpsc-settings&tab=gateway&payment_gateway_id=WPSC_Merchant_MercadoPago_Basic' ) ) . '">' .
 		__( 'Basic Checkout', 'wpecomm-mercadopago-module' ) .
 	'</a>';
-	/*$plugin_links[] = '<a href="' . esc_url( admin_url(
-		'admin.php?page=wc-settings&tab=checkout&section=WPeComm_MercadoPagoCustom_Gateway' ) ) . '">' .
+	$plugin_links[] = '<a href="' . esc_url( admin_url(
+		'options-general.php?page=wpsc-settings&tab=gateway&payment_gateway_id=WPSC_Merchant_MercadoPago_Custom' ) ) . '">' .
 		__( 'Custom Checkout', 'wpecomm-mercadopago-module' ) .
 	'</a>';
 	$plugin_links[] = '<a href="' . esc_url( admin_url(
-		'admin.php?page=wc-settings&tab=checkout&section=WPeComm_MercadoPagoTicket_Gateway' ) ) . '">' .
+		'options-general.php?page=wpsc-settings&tab=gateway&payment_gateway_id=WPSC_Merchant_MercadoPago_Ticket' ) ) . '">' .
 		__( 'Ticket', 'wpecomm-mercadopago-module' ) .
-	'</a>';*/
+	'</a>';
 	return array_merge( $plugin_links, $links );
 }
 $plugin = plugin_basename( __FILE__ );

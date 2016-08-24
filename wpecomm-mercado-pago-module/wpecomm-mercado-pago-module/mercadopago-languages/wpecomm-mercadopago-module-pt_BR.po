@@ -12,6 +12,13 @@ msgstr ""
 "POT-Creation-Date: \n"
 "Last-Translator: marcelo tomio hama <marcelo.hama@mercadolivre.com>\n"
 "Language-Team: \n"
+"Language: pt_BR\n"
+
+msgid "Mercado Pago - Basic Checkout"
+msgstr "Mercado Pago - Checkout Básico"
+
+msgid "Mercado Pago - Credit Card"
+msgstr "Mercado Pago - Cartão de Crédito"
 
 msgid "Mercado Pago Basic Checkout"
 msgstr "Checkout Básico Mercado Pago"
@@ -234,3 +241,33 @@ msgstr "Pagar com Mercado Pago"
 
 msgid "An error occurred when proccessing your payment. Please try again or contact us for assistence."
 msgstr "Um erro ocorreu ao processar seu pagamento. Por favor tente novamente ou nos contacte para assistência."
+
+msgid "Public Key"
+msgstr "Public Key"
+
+msgid "Access Token"
+msgstr "Access Token"
+
+msgid "Insert your Mercado Pago Access Token."
+msgstr "Insira seu Access Token do Mercado Pago."
+
+msgid "Insert your Mercado Pago Public Key."
+msgstr "Insira sua Public Key do Mercado Pago."
+
+msgid "Binary Mode"
+msgstr "Modo Binário"
+
+msgid "When charging a credit card, only [approved] or [reject] status will be taken."
+msgstr "Ao realizar a cobrança no cartão, apenas os status [aprovado] ou [rejeitado] serão considerados."
+
+msgid "Coupons"
+msgstr "Cupons"
+
+msgid "If there is a Mercado Pago campaign, allow your store to give discounts to customers."
+msgstr "Caso haja uma campanha do Mercado Pago, permite que sua loja disponibilize descontos aos clientes."
+
+msgid "Statement Descriptor"
+msgstr "Descritor da Nota Fiscal"
+
+msgid "The description that will be shown in your customer's invoice."
+msgstr "A descrição que será mostrada na nota fiscal de seu cliente."
