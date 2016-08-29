@@ -80,10 +80,10 @@ msgstr ""
 msgid "Checkout Options"
 msgstr ""
 
-msgid "Description"
+msgid "Resume Message"
 msgstr ""
 
-msgid "Description shown to the client in the checkout."
+msgid "Message shown to client in transaction resume."
 msgstr ""
 
 msgid "Define which type of products your store sells."
@@ -236,7 +236,7 @@ msgstr ""
 msgid "Thank you for your order. Proceed with your payment completing the following information."
 msgstr ""
 
-msgid "Pay with Mercado Pago"
+msgid "Your order has been made with Mercado Pago."
 msgstr ""
 
 msgid "An error occurred when proccessing your payment. Please try again or contact us for assistence."

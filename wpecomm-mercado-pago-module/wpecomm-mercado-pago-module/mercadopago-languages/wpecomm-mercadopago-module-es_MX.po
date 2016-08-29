@@ -80,11 +80,11 @@ msgstr "Inserte su Client_secret de Mercado Pago."
 msgid "Checkout Options"
 msgstr "Opciones de Checkout"
 
-msgid "Description"
-msgstr "Descripción"
+msgid "Resume Message"
+msgstr "Resumen Mensaje"
 
-msgid "Description shown to the client in the checkout."
-msgstr "Descripción mostrada al cliente en el checkout."
+msgid "Message shown to client in transaction resume."
+msgstr "Mensaje mostrado para el cliente en resumen de la transacción."
 
 msgid "Define which type of products your store sells."
 msgstr "Defina el tipo de productos que su tienda vende."
@@ -236,8 +236,8 @@ msgstr "Seguir pagando con Mercado Pago"
 msgid "Thank you for your order. Proceed with your payment completing the following information."
 msgstr "Gracias por su compra. Prosiga con su pago completando la información abajo."
 
-msgid "Pay with Mercado Pago"
-msgstr "Pagar con Mercado Pago"
+msgid "Your order has been made with Mercado Pago."
+msgstr "Su pedido ha sido realizado con Mercado Pago."
 
 msgid "An error occurred when proccessing your payment. Please try again or contact us for assistence."
 msgstr "Se ha producido un error en el procesamiento de su pago. Por favor, inténtelo de nuevo o póngase en contacto con nosotros para Asistencia."
