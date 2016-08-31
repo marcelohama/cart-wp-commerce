@@ -271,3 +271,105 @@ msgstr "Descritor da Nota Fiscal"
 
 msgid "The description that will be shown in your customer's invoice."
 msgstr "A descrição que será mostrada na nota fiscal de seu cliente."
+
+msgid "Other Bank"
+msgstr "Outro Banco"
+
+msgid "Choose"
+msgstr "Escolha"
+
+msgid "Your Card"
+msgstr "Seus Cartões"
+
+msgid "Other Cards"
+msgstr "Outros Cartões"
+
+msgid "Other Card"
+msgstr "Outro Cartão"
+
+msgid "ended in"
+msgstr "terminado em"
+
+msgid " as it appears in your card ..."
+msgstr " como aparece no seu cartão ..."
+
+msgid "Credit card number"
+msgstr "Número do cartão de crédito"
+
+msgid "Expiration month"
+msgstr "Mês de expiração"
+
+msgid "Expiration year"
+msgstr "Ano de expiração"
+
+msgid "Year"
+msgstr "Ano"
+
+msgid "Month"
+msgstr "Mês"
+
+msgid "Card holder name"
+msgstr "Nome do dono do cartão"
+
+msgid "Security code"
+msgstr "Código de segurança"
+
+msgid "Document Type"
+msgstr "Tipo de documento"
+
+msgid "Document number"
+msgstr "Número do CPF"
+
+msgid "Issuer"
+msgstr "Emitente"
+
+msgid "Installments"
+msgstr "Parcelas"
+
+msgid "Parameter cardNumber can not be null/empty"
+msgstr "O campo [Número do cartão] não pode ser nulo/vazio"
+
+msgid "Invalid Card Number"
+msgstr "Número do cartão inválido"
+
+msgid "Invalid Expiration Date"
+msgstr "Data de expiração inválida"
+
+msgid "Parameter cardholderName can not be null/empty"
+msgstr "O campo [Nome do dono do cartão] não pode ser nulo/vazio"
+
+msgid "Invalid Card Holder Name"
+msgstr "Nome do dono do cartão inválido"
+
+msgid "Parameter securityCode can not be null/empty"
+msgstr "O campo [Código de segurança] não pode ser nulo/vazio"
+
+msgid "Invalid Security Code"
+msgstr "Código de segurança inválido"
+
+msgid "Parameter docType can not be null/empty"
+msgstr "O campo [Tipo do documento] não pode ser nulo/vazio"
+
+msgid "Invalid Document Type"
+msgstr "Tipo do documento inválido"
+
+msgid "Parameter docNumber can not be null/empty"
+msgstr "O campo [Número do documento] não pode ser nulo/vazio"
+
+msgid "Invalid Document Number"
+msgstr "Número do documento inválido"
+
+msgid "The parameter cardholder.document.subtype can not be null or empty"
+msgstr "O campo [Subtipo do documento] não pode ser nulo/vazio"
+
+msgid "Invalid Document Sub Type"
+msgstr "Subtipo do documento inválido"
+
+msgid "Parameter cardIssuerId can not be null/empty"
+msgstr "O campo [Emitente do cartão] não pode ser nulo/vazio"
+
+msgid "Payment with converted currency"
+msgstr "Pagamento com moeda convertida"
+
+msgid "Payment Method"
+msgstr "Meio de Pagamento"

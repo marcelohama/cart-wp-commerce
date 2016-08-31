@@ -1,4 +1,4 @@
-# Translation of WP e-Commerce in Portuguese (Brazil)
+# Translation of WP e-Commerce
 # This file is distributed under the same license as the WP e-Commerce package.
 msgid ""
 msgstr ""
@@ -12,7 +12,6 @@ msgstr ""
 "POT-Creation-Date: \n"
 "Last-Translator: marcelo tomio hama <marcelo.hama@mercadolivre.com>\n"
 "Language-Team: \n"
-
 
 msgid "Mercado Pago - Basic Checkout"
 msgstr ""
@@ -270,4 +269,106 @@ msgid "Statement Descriptor"
 msgstr ""
 
 msgid "The description that will be shown in your customer's invoice."
+msgstr ""
+
+msgid "Other Bank"
+msgstr ""
+
+msgid "Choose"
+msgstr ""
+
+msgid "Your Card"
+msgstr ""
+
+msgid "Other Cards"
+msgstr ""
+
+msgid "Other Card"
+msgstr ""
+
+msgid "ended in"
+msgstr ""
+
+msgid " as it appears in your card ..."
+msgstr ""
+
+msgid "Credit card number"
+msgstr ""
+
+msgid "Expiration month"
+msgstr ""
+
+msgid "Expiration year"
+msgstr ""
+
+msgid "Year"
+msgstr ""
+
+msgid "Month"
+msgstr ""
+
+msgid "Card holder name"
+msgstr ""
+
+msgid "Security code"
+msgstr ""
+
+msgid "Document Type"
+msgstr ""
+
+msgid "Document number"
+msgstr ""
+
+msgid "Issuer"
+msgstr ""
+
+msgid "Installments"
+msgstr ""
+
+msgid "Parameter cardNumber can not be null/empty"
+msgstr ""
+
+msgid "Invalid Card Number"
+msgstr ""
+
+msgid "Invalid Expiration Date"
+msgstr ""
+
+msgid "Parameter cardholderName can not be null/empty"
+msgstr ""
+
+msgid "Invalid Card Holder Name"
+msgstr ""
+
+msgid "Parameter securityCode can not be null/empty"
+msgstr ""
+
+msgid "Invalid Security Code"
+msgstr ""
+
+msgid "Parameter docType can not be null/empty"
+msgstr ""
+
+msgid "Invalid Document Type"
+msgstr ""
+
+msgid "Parameter docNumber can not be null/empty"
+msgstr ""
+
+msgid "Invalid Document Number"
+msgstr ""
+
+msgid "The parameter cardholder.document.subtype can not be null or empty"
+msgstr ""
+
+msgid "Invalid Document Sub Type"
+msgstr ""
+
+msgid "Parameter cardIssuerId can not be null/empty"
+msgstr ""
+
+msgid "Payment with converted currency"
+msgstr ""
+
+msgid "Payment Method"
 msgstr ""
