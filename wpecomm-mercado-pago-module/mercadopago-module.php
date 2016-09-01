@@ -52,10 +52,6 @@ class WPeComm_MercadoPago_Module {
         plugin_dir_path( __FILE__ ) . 'wpecomm-mercado-pago-module/mercadopago-lib',
         dirname(plugin_dir_path( __FILE__ )) . '/wp-e-commerce/wpsc-merchants/mercadopago-lib'
       );
-      $this->recurse_copy(
-        plugin_dir_path( __FILE__ ) . 'wpecomm-mercado-pago-module/mercadopago-templates',
-        dirname(plugin_dir_path( __FILE__ )) . '/wp-e-commerce/wpsc-merchants/mercadopago-templates'
-      );
       copy(
         plugin_dir_path( __FILE__ ) . 'wpecomm-mercado-pago-module/mercadopago-basic.php',
         dirname(plugin_dir_path( __FILE__ )) . '/wp-e-commerce/wpsc-merchants/mercadopago-basic.php'
@@ -85,9 +81,6 @@ class WPeComm_MercadoPago_Module {
     }
     if ( file_exists( dirname(plugin_dir_path( __FILE__ )) . '/wp-e-commerce/wpsc-merchants/mercadopago-basic.php' ) ) {
       unlink( dirname(plugin_dir_path( __FILE__ )) . '/wp-e-commerce/wpsc-merchants/mercadopago-basic.php' );
-    }
-    if ( file_exists( dirname(plugin_dir_path( __FILE__ )) . '/wp-e-commerce/wpsc-merchants/mercadopago-templates' ) ) {
-      $this->deleteDir( dirname(plugin_dir_path( __FILE__ )) . '/wp-e-commerce/wpsc-merchants/mercadopago-templates' );
     }
     if ( file_exists( dirname(plugin_dir_path( __FILE__ )) . '/wp-e-commerce/wpsc-merchants/mercadopago-lib' ) ) {
       $this->deleteDir( dirname(plugin_dir_path( __FILE__ )) . '/wp-e-commerce/wpsc-merchants/mercadopago-lib' );

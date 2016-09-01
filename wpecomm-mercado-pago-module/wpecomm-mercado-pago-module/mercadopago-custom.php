@@ -13,6 +13,47 @@
 include_once "mercadopago-lib/mercadopago.php";
 
 if (isset($_REQUEST['mercadopago_custom'])) {
+
+	$purchase_log = new WPSC_Purchase_Log($_REQUEST['mercadopago_custom']['purchase_id']);
+	$preference = unserialize(base64_decode($_REQUEST['mercadopago_custom']['preference']));
+
+	$mp = new MP( // Create MP object and checks for sandbox mode
+		get_option('mercadopago_custom_accesstoken')
+	);
+	$isTestUser = get_option('mercadopago_custom_istestuser');
+	if ( 'active' == get_option('mercadopago_custom_sandbox') ) {
+		$mp->sandbox_mode( true );
+	} else {
+		$mp->sandbox_mode( false );
+	}
+
+	//$payment = $mp->create_payment($preference);
+
+	//Now to do actions once the payment has been attempted
+	/*switch ( $purchase_log->get( 'processed' ) ) {
+		case WPSC_Purchase_Log::ACCEPTED_PAYMENT:
+			// payment worked
+			do_action('wpsc_payment_successful');
+			break;
+		case WPSC_Purchase_Log::INCOMPLETE_SALE:
+			// payment declined
+			do_action('wpsc_payment_failed');
+			break;
+		case WPSC_Purchase_Log::ORDER_RECEIVED:
+			// something happened with the payment
+			do_action('wpsc_payment_incomplete');
+			break;
+	}*/
+
+	/*$transaction_url_with_sessionid = add_query_arg(
+		'sessionid', $_REQUEST['mercadopago_custom']['session_id'],
+		get_option( 'transact_url' )
+	);
+	wp_redirect( $transaction_url_with_sessionid );*/
+	//$preference = json_encode(array_values($preference));
+	//echo print_r($preference, true);
+	echo $preference['additional_info']['shipments']['receiver_address']['street_name'];
+
 	//header( 'HTTP/1.1 200 OK' );
   //header( 'Content-Type: application/json' );
   //echo json_encode( $response );
@@ -30,8 +71,18 @@ if (isset($_REQUEST['mercadopago_custom'])) {
 		))
 	));*/
 
-	$exported_wpsc_cart = html_entity_decode($_REQUEST['mercadopago_custom']['wpsc_cart']);
-	$exported_wpsc_cart = unserialize($exported_wpsc_cart);
+	//$exported_wpsc_cart = html_entity_decode($_REQUEST['mercadopago_custom']['wpsc_cart']);
+	//$exported_wpsc_cart = unserialize(base64_decode($_REQUEST['mercadopago_custom']['wpsc_cart']));
+	//$exported_wpsc_cart = preg_replace('!s:(\d+):"(.*?)";!e', "'s:'.strlen('$2').':\"$2\";'", $exported_wpsc_cart);
+	/*$exported_wpsc_cart = preg_replace_callback(
+    	"/\{([<>])([a-zA-Z0-9_]*)(\?{0,1})([a-zA-Z0-9_]*)\}(.*)\{\\1\/\\2\}/isU",
+	    function($m) { return CallFunction($m[1], $m[2], $m[3], $m[4], $m[5]); },
+	    $exported_wpsc_cart
+	);*/
+	//$exported_wpsc_cart = str_replace('"', "'", $exported_wpsc_cart);
+	//findSerializeError($exported_wpsc_cart);
+
+	//$exported_wpsc_cart = unserialize($exported_wpsc_cart);
 	//$exported_wpsc_cart = print_r_reverse(stripslashes(trim(preg_replace('/\s\s+/', ' ', $exported_wpsc_cart))));
 	/*$wpsc_cart = json_encode( print_r_reverse(
 		stripslashes(
@@ -41,7 +92,7 @@ if (isset($_REQUEST['mercadopago_custom'])) {
 		))
 	);*/
 
-	//echo json_encode( $exported_wpsc_cart, JSON_PRETTY_PRINT );
+	//echo "exported value = " . $exported_wpsc_cart->selected_shipping_option;
 		//->selected_shipping_method;
 
 	exit();
@@ -134,148 +185,161 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 		} catch ( Exception $e ) {
 			// TODO: handle exception
 		}
-
 		// build payment banner url
 		$banners_mercadopago_standard = array(
-		  "MLA" => 'MLA/standard.jpg',
-		  "MLB" => 'MLB/standard.jpg',
-		  "MCO" => 'MCO/standard.jpg',
-		  "MLC" => 'MLC/standard.gif',
+			"MLA" => 'MLA/standard.jpg',
+		  	"MLB" => 'MLB/standard.jpg',
+		  	"MCO" => 'MCO/standard.jpg',
+		 	"MLC" => 'MLC/standard.gif',
 			"MPE" => 'MPE/standard.png',
-	    "MLV" => 'MLV/standard.jpg',
-	    "MLM" => 'MLM/standard.jpg'
-	  );
-	  $serialized_cart = htmlentities(serialize($wpsc_cart));
+	    	"MLV" => 'MLV/standard.jpg',
+	    	"MLM" => 'MLM/standard.jpg'
+	  	);
 
-		// header
+	  	// header
 		$payment_header =
 			'<div width="100%" style="margin:0px; padding:16px 36px 16px 36px; background:white;
 				border-style:solid; border-color:#DDDDDD" border-radius:1.0px;">
-				<img class="logo" src=' . plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) . '
+				<img class="logo" src=' .
+					plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) . '
 					" width="156" height="40" />
 				<img alt="Mercado Pago" title="Mercado Pago" class="mp-creditcard-banner" src="' .
-					$this->getImagePath($banners_mercadopago_standard[get_option('mercadopago_custom_siteid')]) . '" width="312" height="40" />
+					$this->getImagePath($banners_mercadopago_standard[get_option('mercadopago_custom_siteid')]) . '
+					" width="312" height="40" />
 			</div>';
 		// payment method
 		$mercadopago_form =
 			'<form action="' . //plugins_url('wpsc-merchants/mercadopago-lib/cst_post.php', plugin_dir_path(__FILE__)) .
+				//htmlspecialchars($_SERVER["PHP_SELF"]) .
 				'" method="post"><fieldset style="background:white;">
-
 				<div id="mercadopago-form-customer-and-card" style="padding:0px 36px 0px 36px;">
 					<div class="mp-box-inputs mp-line">
-	      		<label for="paymentMethodIdSelector">' . $form_labels['form']['payment_method'] . ' <em>*</em></label>
-	        	<select id="paymentMethodSelector" name="mercadopago_custom[paymentMethodSelector]" data-checkout="cardId">
-	          	<optgroup label=' . $form_labels['form']['your_card'] . ' id="payment-methods-for-customer-and-cards">' .
-	          		payment_methods_customer_cards($customer_cards, $form_labels) .
-	          	'</optgroup>
-	          	<optgroup label="' . $form_labels['form']['other_cards'] . '" id="payment-methods-list-other-cards">
-	            	<option value="-1">' . $form_labels['form']['other_card'] . '</option>
-	          	</optgroup>
-	        	</select>
-	    		</div>
-	    		<div class="mp-box-inputs mp-line" id="mp-securityCode-customer-and-card">
-	      		<div class="mp-box-inputs mp-col-45">
-	      			<label for="customer-and-card-securityCode">' . $form_labels['form']['security_code'] . ' <em>*</em></label>
-	        		<input type="text" id="customer-and-card-securityCode" data-checkout="securityCode" autocomplete="off"
-		        		maxlength="4" style="padding: 8px; background: url( ' . $this->getImagePath('cvv.png') . ' ) 98% 50% no-repeat;"/>
-		          <span class="mp-error" id="mp-error-224" data-main="#customer-and-card-securityCode"> ' .
-		          	$form_labels['error']['224'] . ' </span>
-		          <span class="mp-error" id="mp-error-E302" data-main="#customer-and-card-securityCode"> ' .
-		         		$form_labels['error']['E302'] . ' </span>
-	      		</div>
-	    		</div>
+	      				<label for="paymentMethodIdSelector">' . $form_labels['form']['payment_method'] . ' <em>*</em></label>
+	        			<select id="paymentMethodSelector" name="mercadopago_custom[paymentMethodSelector]" data-checkout="cardId">
+	          				<optgroup label=' . $form_labels['form']['your_card'] . ' id="payment-methods-for-customer-and-cards">' .
+	          					payment_methods_customer_cards($customer_cards, $form_labels) .
+	          				'</optgroup>
+	          				<optgroup label="' . $form_labels['form']['other_cards'] . '" id="payment-methods-list-other-cards">
+	            				<option value="-1">' . $form_labels['form']['other_card'] . '</option>
+	          				</optgroup>
+	        			</select>
+	    			</div>
+	    			<div class="mp-box-inputs mp-line" id="mp-securityCode-customer-and-card">
+	      				<div class="mp-box-inputs mp-col-45">
+		      				<label for="customer-and-card-securityCode">' . $form_labels['form']['security_code'] . ' <em>*</em></label>
+		        			<input type="text" id="customer-and-card-securityCode" data-checkout="securityCode" autocomplete="off"
+			        			maxlength="4" style="padding: 8px; background: url( ' . $this->getImagePath('cvv.png') .
+		        				' ) 98% 50% no-repeat;"/>
+		          			<span class="mp-error" id="mp-error-224" data-main="#customer-and-card-securityCode"> ' .
+		          				$form_labels['error']['224'] . ' </span>
+		          			<span class="mp-error" id="mp-error-E302" data-main="#customer-and-card-securityCode"> ' .
+			         			$form_labels['error']['E302'] . ' </span>
+	      				</div>
+	    			</div>
 				</div>
 
 				<div id="mercadopago-form" style="padding:0px 36px 0px 36px;">
-	    		<div class="mp-box-inputs mp-col-100">
-	        	<label for="cardNumber">' . $form_labels['form']['credit_card_number'] . ' <em>*</em></label>
-	        	<input type="text" id="cardNumber" data-checkout="cardNumber" autocomplete="off" maxlength="19"/>
-	        	<span class="mp-error" id="mp-error-205" data-main="#cardNumber"> ' . $form_labels['error']['205'] . ' </span>
-	        	<span class="mp-error" id="mp-error-E301" data-main="#cardNumber"> ' . $form_labels['error']['E301'] . ' </span>
-	    		</div>
-	    		<div class="mp-box-inputs mp-line">
-	        	<div class="mp-box-inputs mp-col-45">
-	            <label for="cardExpirationMonth">' . $form_labels['form']['expiration_month'] . ' <em>*</em></label>
-	            <select id="cardExpirationMonth" data-checkout="cardExpirationMonth" name="mercadopago_custom[cardExpirationMonth]">
+    				<div class="mp-box-inputs mp-col-100">
+        				<label for="cardNumber">' . $form_labels['form']['credit_card_number'] . ' <em>*</em></label>
+        				<input type="text" id="cardNumber" data-checkout="cardNumber" autocomplete="off" maxlength="19"/>
+        				<span class="mp-error" id="mp-error-205" data-main="#cardNumber"> ' .
+        					$form_labels['error']['205'] . ' </span>
+        				<span class="mp-error" id="mp-error-E301" data-main="#cardNumber"> ' .
+        					$form_labels['error']['E301'] . ' </span>
+    				</div>
+    				<div class="mp-box-inputs mp-line">
+        				<div class="mp-box-inputs mp-col-45">
+		            		<label for="cardExpirationMonth">' . $form_labels['form']['expiration_month'] . ' <em>*</em></label>
+		            		<select id="cardExpirationMonth" data-checkout="cardExpirationMonth" name="mercadopago_custom[cardExpirationMonth]">
 								<option value="-1"> ' . $form_labels['form']['month'] . ' </option>' .
 								'<option value="1"> 1 </option>' . '<option value="2"> 2 </option>' . '<option value="3"> 3 </option>' .
 								'<option value="4"> 4 </option>' . '<option value="5"> 5 </option>' . '<option value="6"> 6 </option>' .
 								'<option value="7"> 7 </option>' . '<option value="8"> 8 </option>' . '<option value="9"> 9 </option>' .
 								'<option value="10"> 10 </option>' . '<option value="11"> 11 </option>' . '<option value="12"> 12 </option>' .
-	          	'</select>
-	        	</div>
-	        	<div class="mp-box-inputs mp-col-10">
-	            <div id="mp-separete-date">
-	            	/
-	            </div>
-	        	</div>
+		          			'</select>
+		        		</div>
+		        		<div class="mp-box-inputs mp-col-10">
+		            		<div id="mp-separete-date">
+		            		/
+		            		</div>
+		        		</div>
 						<div class="mp-box-inputs mp-col-45">
-	          	<label for="cardExpirationYear">' . $form_labels['form']['expiration_year'] . ' <em>*</em></label>
-	          	<select id="cardExpirationYear" data-checkout="cardExpirationYear" name="mercadopago_custom[cardExpirationYear]">
-	          		<option value="-1"> ' . $form_labels['form']['year'] . ' </option>' .
-	        			build_years_for_date() .
-	          	'</select>
-	      		</div>
-						<span class="mp-error" id="mp-error-208" data-main="#cardExpirationMonth"> ' . $form_labels['error']['208'] . ' </span>
+		          			<label for="cardExpirationYear">' . $form_labels['form']['expiration_year'] . ' <em>*</em></label>
+	          				<select id="cardExpirationYear" data-checkout="cardExpirationYear" name="mercadopago_custom[cardExpirationYear]">
+		          				<option value="-1"> ' . $form_labels['form']['year'] . ' </option>' .
+		          				build_years_for_date() .
+	          				'</select>
+      					</div>
+						<span class="mp-error" id="mp-error-208" data-main="#cardExpirationMonth"> ' .
+							$form_labels['error']['208'] . ' </span>
 						<span class="mp-error" id="mp-error-209" data-main="#cardExpirationYear"> </span>
-						<span class="mp-error" id="mp-error-325" data-main="#cardExpirationMonth"> ' . $form_labels['error']['325'] . ' </span>
+						<span class="mp-error" id="mp-error-325" data-main="#cardExpirationMonth"> ' .
+							$form_labels['error']['325'] . ' </span>
 						<span class="mp-error" id="mp-error-326" data-main="#cardExpirationYear"> </span>
 					</div>
-	    		<div class="mp-box-inputs mp-col-100">
-	        	<label for="cardholderName">' . $form_labels['form']['card_holder_name'] . ' <em>*</em></label>
-	        	<input type="text" id="cardholderName" name="mercadopago_custom[cardholderName]" data-checkout="cardholderName" autocomplete="off" />
-	        	<span class="mp-error" id="mp-error-221" data-main="#cardholderName"> ' . $form_labels['error']['221'] . ' </span>
-	        	<span class="mp-error" id="mp-error-316" data-main="#cardholderName"> ' . $form_labels['error']['316'] . ' </span>
-	    		</div>
-	    		<div class="mp-box-inputs mp-line">
-	        	<div class="mp-box-inputs mp-col-45">
-	            <label for="securityCode">' . $form_labels['form']['security_code'] . ' <em>*</em></label>
-	            <input type="text" id="securityCode" data-checkout="securityCode" autocomplete="off"' .
-	            	'maxlength="4" style="padding: 8px; background: url( ' . $this->getImagePath('cvv.png') . ' ) 98% 50% no-repeat;" />
-	            <span class="mp-error" id="mp-error-224" data-main="#securityCode"> ' . $form_labels['error']['224'] . ' </span>
-	            <span class="mp-error" id="mp-error-E302" data-main="#securityCode"> ' . $form_labels['error']['E302'] . ' </span>
-	        	</div>
-	    		</div>
+		    		<div class="mp-box-inputs mp-col-100">
+		        		<label for="cardholderName">' . $form_labels['form']['card_holder_name'] . ' <em>*</em></label>
+		        		<input type="text" id="cardholderName" name="mercadopago_custom[cardholderName]" data-checkout="cardholderName" autocomplete="off" />
+		        		<span class="mp-error" id="mp-error-221" data-main="#cardholderName"> ' .
+		        			$form_labels['error']['221'] . ' </span>
+		        		<span class="mp-error" id="mp-error-316" data-main="#cardholderName"> ' .
+		        			$form_labels['error']['316'] . ' </span>
+		    		</div>
+		    		<div class="mp-box-inputs mp-line">
+		        		<div class="mp-box-inputs mp-col-45">
+		            		<label for="securityCode">' . $form_labels['form']['security_code'] . ' <em>*</em></label>
+		            		<input type="text" id="securityCode" data-checkout="securityCode" autocomplete="off"' .
+		            			'maxlength="4" style="padding: 8px; background: url( ' . $this->getImagePath('cvv.png') .
+	            					' ) 98% 50% no-repeat;" />
+		            		<span class="mp-error" id="mp-error-224" data-main="#securityCode"> ' .
+		            			$form_labels['error']['224'] . ' </span>
+		            		<span class="mp-error" id="mp-error-E302" data-main="#securityCode"> ' .
+		            			$form_labels['error']['E302'] . ' </span>
+		        		</div>
+		    		</div>
 					<div class="mp-box-inputs mp-col-100 mp-doc">
-	        	<div class="mp-box-inputs mp-col-35 mp-docType">
-	            <label for="docType">' . $form_labels['form']['document_type'] . ' <em>*</em></label>
-	            <select id="docType" data-checkout="docType" name="mercadopago_custom[docType]"></select>
-	            <span class="mp-error" id="mp-error-212" data-main="#docType"> ' . $form_labels['error']['212'] . ' </span>
-	            <span class="mp-error" id="mp-error-322" data-main="#docType"> ' . $form_labels['error']['322'] . ' </span>
-	        	</div>
-	      		<div class="mp-box-inputs mp-col-65 mp-docNumber">
-		          <label for="docNumber">' . $form_labels['form']['document_number'] . ' <em>*</em></label>
-		          <input type="text" id="docNumber" data-checkout="docNumber" name="mercadopago_custom[docNumber]" autocomplete="off" />
-		          <span class="mp-error" id="mp-error-214" data-main="#docNumber"> ' . $form_labels['error']['214'] . ' </span>
-		          <span class="mp-error" id="mp-error-324" data-main="#docNumber"> ' . $form_labels['error']['324'] . ' </span>
-		        </div>
-	  			</div>
+		        		<div class="mp-box-inputs mp-col-35 mp-docType">
+		            		<label for="docType">' . $form_labels['form']['document_type'] . ' <em>*</em></label>
+		            		<select id="docType" data-checkout="docType" name="mercadopago_custom[docType]"></select>
+	            			<span class="mp-error" id="mp-error-212" data-main="#docType"> ' .
+	            				$form_labels['error']['212'] . ' </span>
+		            		<span class="mp-error" id="mp-error-322" data-main="#docType"> ' .
+		            			$form_labels['error']['322'] . ' </span>
+		        		</div>
+		      			<div class="mp-box-inputs mp-col-65 mp-docNumber">
+			          		<label for="docNumber">' . $form_labels['form']['document_number'] . ' <em>*</em></label>
+			          		<input type="text" id="docNumber" data-checkout="docNumber" name="mercadopago_custom[docNumber]" autocomplete="off" />
+		          			<span class="mp-error" id="mp-error-214" data-main="#docNumber"> ' .
+		          				$form_labels['error']['214'] . ' </span>
+		          			<span class="mp-error" id="mp-error-324" data-main="#docNumber"> ' .
+		          				$form_labels['error']['324'] . ' </span>
+			        	</div>
+		  			</div>
 					<div class="mp-box-inputs mp-col-100 mp-issuer">
-	        	<label for="issuer">' . $form_labels['form']['issuer'] . ' <em>*</em></label>
-	        	<select id="issuer" data-checkout="issuer" name="mercadopago_custom[issuer]"></select>
+		        		<label for="issuer">' . $form_labels['form']['issuer'] . ' <em>*</em></label>
+		        		<select id="issuer" data-checkout="issuer" name="mercadopago_custom[issuer]"></select>
 						<span class="mp-error" id="mp-error-220" data-main="#issuer"> ' . $form_labels['error']['220'] . ' </span>
-	  			</div>
+		  			</div>
 				</div>
 
 				<div class="mp-box-inputs mp-col-100" style="padding:0px 36px 0px 36px;">
-		  		<label for="installments">' .
-		  		$form_labels['form']['installments'] . (
-		  			(get_option('mercadopago_custom_currencyconversion') == "active") > 0 ?
-		  				" (" . $form_labels['form']['payment_converted'] . ")" : ""
-		  		) . ' <em>*</em>
-		  		</label>
-		      <select id="installments" data-checkout="installments" name="mercadopago_custom[installments]"></select>
-		  	</div>
-		  	<div class="mp-box-inputs mp-line" style="padding:0px 36px 0px 36px;">
+			  		<label for="installments">' . $form_labels['form']['installments'] . (
+			  			(get_option('mercadopago_custom_currencyconversion') == "active") > 0 ?
+			  				" (" . $form_labels['form']['payment_converted'] . ")" : ""
+			  			) . ' <em>*</em>
+			  		</label>
+			      	<select id="installments" data-checkout="installments" name="mercadopago_custom[installments]"></select>
+			  	</div>
+			  	<div class="mp-box-inputs mp-line" style="padding:0px 36px 0px 36px;">
 					<div class="mp-box-inputs mp-col-45">
-	      		<input type="submit" id="submit" value="Pay">
+		      			<input type="submit" id="submit" value="' . $form_labels['form']['pay_with_mp'] . '">
 					</div>
 					<div class="mp-box-inputs mp-col-45" style="background: #00FFFFFF; float: right;">
-	          <div id="mp-box-loading" style="margin: 4px 4px 4px 0px;"></div>
+		          		<div id="mp-box-loading" style="margin: 4px 4px 4px 0px;"></div>
 					</div>
-	    	</div>
+		    	</div>
 
-	    	<div class="mp-box-inputs mp-col-100" id="mercadopago-utilities" style="padding:0px 36px 0px 36px;">
+		    	<div class="mp-box-inputs mp-col-100" id="mercadopago-utilities" style="padding:0px 36px 0px 36px;">
 					<input type="hidden" id="site_id" name="mercadopago_custom[site_id]"/>
 					<input type="hidden" id="amount" value="' . $wpsc_cart->calculate_total_price() . '" name="mercadopago_custom[amount]"/>
 					<input type="hidden" id="paymentMethodId" name="mercadopago_custom[paymentMethodId]"/>
@@ -283,51 +347,56 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 					<input type="hidden" id="cardTruncated" name="mercadopago_custom[cardTruncated]"/>
 					<input type="hidden" id="CustomerAndCard" name="mercadopago_custom[CustomerAndCard]"/>
 					<input type="hidden" id="CustomerId" value="' . $customerId . '" name="mercadopago_custom[CustomerId]"/>
-					<input type="hidden" id="wpsc_cart" value="' . print_r($serialized_cart, true) . '" name="mercadopago_custom[wpsc_cart]"/>
-		  	</div>
+
+					<input type="hidden" id="session_id" value="' . $this->cart_data['session_id'] . '" name="mercadopago_custom[session_id]"/>
+					<input type="hidden" id="purchase_id" value="' . $this->purchase_id . '" name="mercadopago_custom[purchase_id]"/>
+					<input type="hidden" id="preference" value="' . base64_encode(serialize($this->create_preference($wpdb, $wpsc_cart))) .
+						'" name="mercadopago_custom[preference]"/>
+			  	</div>
 
 			</fieldset></form>';
 
 		$page_js = '
 			<script src="https://secure.mlstatic.com/sdk/javascript/v1/mercadopago.js"></script>
-			<script src="' . plugins_url( 'wpsc-merchants/mercadopago-lib/MPv1.js?no_cache=' . time(), plugin_dir_path( __FILE__ ) ) . '"></script>
+			<script src="' . plugins_url( 'wpsc-merchants/mercadopago-lib/MPv1.js?no_cache=' .
+				time(), plugin_dir_path( __FILE__ ) ) . '"></script>
 			<script type="text/javascript">
 				var mercadopago_site_id = "' . get_option('mercadopago_custom_siteid') . '";
 				var mercadopago_public_key = "' . get_option('mercadopago_custom_publickey') . '";
 				MPv1.text.choose = "' . $form_labels["form"]["label_choose"] . '";
-		  	MPv1.text.other_bank = "' . $form_labels["form"]["label_other_bank"] . '";
-		    MPv1.paths.loading = "' . $this->getImagePath('loading.gif') . '";
-		  	MPv1.setForm = function() {
-		      if (MPv1.customer_and_card.status) {
-		        document.querySelector(MPv1.selectors.form).style.display = "none";
-		        document.querySelector(MPv1.selectors.mpSecurityCodeCustomerAndCard).removeAttribute("style");
-		      } else {
-		        document.querySelector(MPv1.selectors.mpSecurityCodeCustomerAndCard).style.display = "none";
-		        document.querySelector(MPv1.selectors.form).removeAttribute("style");
-		        document.querySelector(MPv1.selectors.form).style.padding = "0px 36px 0px 36px";
-		      }
-		      Mercadopago.clearSession();
-		      if (MPv1.create_token_on.event) {
-		        MPv1.createTokenByEvent();
-		        MPv1.validateInputsCreateToken();
-		      }
-		      document.querySelector(MPv1.selectors.CustomerAndCard).value = MPv1.customer_and_card.status;
-		  	}
-		  	MPv1.getAmount = function() {
-		      return document.querySelector(MPv1.selectors.amount).value;
-		  	}
-		  	MPv1.showErrors = function(response) {
-		      var $form = MPv1.getForm();
-		      for (var x = 0; x < response.cause.length; x++) {
-		        var error = response.cause[x];
-		        var $span = $form.querySelector("#mp-error-" + error.code);
-		        var $input = $form.querySelector($span.getAttribute("data-main"));
-		        $span.style.display = "inline-block";
-		        $input.classList.add("mp-error-input");
-		    	}
-		    	return;
+			  	MPv1.text.other_bank = "' . $form_labels["form"]["label_other_bank"] . '";
+			    MPv1.paths.loading = "' . $this->getImagePath('loading.gif') . '";
+			  	MPv1.setForm = function() {
+					if (MPv1.customer_and_card.status) {
+				        document.querySelector(MPv1.selectors.form).style.display = "none";
+				        document.querySelector(MPv1.selectors.mpSecurityCodeCustomerAndCard).removeAttribute("style");
+		      		} else {
+				        document.querySelector(MPv1.selectors.mpSecurityCodeCustomerAndCard).style.display = "none";
+				        document.querySelector(MPv1.selectors.form).removeAttribute("style");
+				        document.querySelector(MPv1.selectors.form).style.padding = "0px 36px 0px 36px";
+			      	}
+			      	Mercadopago.clearSession();
+			      	if (MPv1.create_token_on.event) {
+				        MPv1.createTokenByEvent();
+				        MPv1.validateInputsCreateToken();
+			      	}
+			      	document.querySelector(MPv1.selectors.CustomerAndCard).value = MPv1.customer_and_card.status;
+			  	}
+			  	MPv1.getAmount = function() {
+			      	return document.querySelector(MPv1.selectors.amount).value;
+			  	}
+			  	MPv1.showErrors = function(response) {
+					var $form = MPv1.getForm();
+					for (var x = 0; x < response.cause.length; x++) {
+				        var error = response.cause[x];
+				        var $span = $form.querySelector("#mp-error-" + error.code);
+				        var $input = $form.querySelector($span.getAttribute("data-main"));
+			        	$span.style.display = "inline-block";
+			        	$input.classList.add("mp-error-input");
+			    	}
+			    	return;
 				}
-		  	MPv1.Initialize(mercadopago_site_id, mercadopago_public_key);
+			  	MPv1.Initialize(mercadopago_site_id, mercadopago_public_key);
 			</script>';
 
 		$page_html =
@@ -339,14 +408,201 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 					'?ver=4.5.3" type="text/css" media="all">' .
 				'<script src="' . plugins_url( 'wpsc-merchants/mercadopago-lib/MPv1.js?no_cache=' . time(), plugin_dir_path( __FILE__ ) ) . '"></script>' .
 			'</head>';
+
 		$page_html .= '<div style="width: 600px;">' . $payment_header . '</div>';
 		$page_html .= '<div style="width: 600px;">' . $mercadopago_form . '</div>';
 		$page_html .= $page_js;
 		echo $page_html;
+			
+		exit();
+	}
 
-		//$this->set_purchase_processed_by_purchid(2);
-	 	//$this->go_to_transaction_results($this->cart_data['session_id']);
-	 	exit();
+	// Process the payment of Mercado Pago
+	function create_preference($wpdb, $wpsc_cart) {
+
+		// this grabs the purchase log id from the database that refers to the $sessionid
+		$purchase_log = $wpdb->get_row(
+			"SELECT * FROM `" . WPSC_TABLE_PURCHASE_LOGS .
+			"` WHERE `sessionid`= " . $this->cart_data['session_id'] . " LIMIT 1"
+			, ARRAY_A);
+
+		// this grabs the customer info using the $purchase_log from the previous SQL query
+		$usersql = "SELECT `" . WPSC_TABLE_SUBMITED_FORM_DATA . "`.value,
+			`" . WPSC_TABLE_CHECKOUT_FORMS . "`.`name`,
+			`" . WPSC_TABLE_CHECKOUT_FORMS . "`.`unique_name` FROM
+			`" . WPSC_TABLE_CHECKOUT_FORMS . "` LEFT JOIN
+			`" . WPSC_TABLE_SUBMITED_FORM_DATA . "` ON
+			`" . WPSC_TABLE_CHECKOUT_FORMS . "`.id =
+			`" . WPSC_TABLE_SUBMITED_FORM_DATA . "`.`form_id` WHERE
+			`" . WPSC_TABLE_SUBMITED_FORM_DATA . "`.`log_id`=" . $purchase_log['id'];
+		$userinfo = $wpdb->get_results($usersql, ARRAY_A);
+		$arr_info = array();
+		foreach ((array)$userinfo as $key => $value){
+			$arr_info[$value['unique_name']] = $value['value'];
+		}
+
+		// Here we build the array that contains ordered itens, from customer cart
+		$items = array();
+		$purchase_description = "";
+		if (sizeof($wpsc_cart->cart_items) > 0) {
+			foreach ($wpsc_cart->cart_items as $i => $item) {
+				if ($item->quantity > 0) {
+					$product = get_post($item->product_id);
+					$picture_url = 'https://www.mercadopago.com/org-img/MP3/home/logomp3.gif';
+					if ($item->thumbnail_image) {
+						foreach ($item->thumbnail_image as $key => $image) {
+							if ($key == 'guid') {
+								$picture_url = $image;
+								break;
+							}
+						}
+					}
+					$purchase_description =
+						$purchase_description . ' ' .
+						( $item->product_name . ' x ' . $item->quantity );
+					array_push($items, array(
+						'id' => $item->product_id,
+						'title' => ( $item->product_name . ' x ' . $item->quantity ),
+						'description' => sanitize_file_name( (
+							// This handles description width limit of Mercado Pago.
+							strlen( $product->post_content ) > 230 ?
+							substr( $product->post_content, 0, 230 ) . "..." :
+							$product->post_content
+						)),
+						'picture_url' => $picture_url,
+						'category_id' => get_option('mercadopago_custom_category'),
+						'quantity' => 1,
+						'unit_price' => (
+							((float)($item->unit_price)) *
+							(float)($item->quantity)
+						) * (
+							(float)get_option('mercadopago_custom_currencyratio') > 0 ?
+							(float)get_option('mercadopago_custom_currencyratio') : 1
+						)
+					));
+				}
+			}
+
+			// tax fees cost as an item
+			array_push($items, array(
+				'title' => get_option('mercadopago_custom_checkoutmessage1'),
+				'description' => get_option('mercadopago_custom_checkoutmessage1'),
+				'category_id' => get_option('mercadopago_custom_category'),
+				'quantity' => 1,
+				'unit_price' => (
+					((float)($wpsc_cart->total_tax))
+				) * (
+					(float)get_option('mercadopago_custom_currencyratio') > 0 ?
+					(float)get_option('mercadopago_custom_currencyratio') : 1
+				)
+			));
+
+			// shipment cost as an item
+			array_push($items, array(
+				'title' => $wpsc_cart->selected_shipping_option,
+				'description' => get_option('mercadopago_custom_checkoutmessage2'),
+				'category_id' => get_option('mercadopago_custom_category'),
+				'quantity' => 1,
+				'unit_price' => (
+					((float)($wpsc_cart->base_shipping)+(float)($wpsc_cart->total_item_shipping))
+				) * (
+					(float)get_option('mercadopago_custom_currencyratio') > 0 ?
+					(float)get_option('mercadopago_custom_currencyratio') : 1
+				)
+			));
+		}
+
+		// Build additional information from the customer data
+		$billing_details = wpsc_get_customer_meta();
+		$order_id = $billing_details['_wpsc_cart.log_id'][0];
+	  	$payer_additional_info = array(
+		    'first_name' => $arr_info['billingfirstname'],
+		    'last_name' => $arr_info['billinglastname'],
+		    //'registration_date' =>
+		    'phone'	=> array(
+	  		//'area_code' =>
+				'number' => $arr_info['billingphone']
+			),
+	      	'address' => array(
+				'zip_code' => $arr_info['billingpostcode'],
+				//'street_number' =>
+				'street_name' => $arr_info['billingaddress'] . ' / ' .
+					$arr_info['billingcity'] . ' ' .
+					$arr_info['billingstate'] . ' ' .
+					$arr_info['billingcountry']
+			)
+	  	);
+
+	  	// Create the shipment address information set
+	  	$shipments = array(
+	  		'receiver_address' => array(
+		  		'zip_code' => $arr_info['shippingpostcode'],
+		  		//'street_number' =>
+		  		'street_name' => $arr_info['shippingaddress'] . ' ' .
+		  			$arr_info['shippingcity'] . ' ' .
+		  			$arr_info['shippingstate'] . ' ' .
+		  			$arr_info['shippingcountry'],
+		  		//'floor' =>
+		  		'apartment' => $arr_info['shippingfirstname']
+	  		)
+	  	);
+
+	  	// The payment preference
+	  	$payment_preference = array (
+	  		'transaction_amount' => (float) number_format( $wpsc_cart->calculate_total_price() * (
+				(float)get_option('mercadopago_custom_currencyratio') > 0 ?
+				(float)get_option('mercadopago_custom_currencyratio') : 1
+			), 2 ),
+		  	//'token' => $post_from_form[ 'mercadopago_custom' ][ 'token' ],
+		  	'description' => $purchase_description,
+		  	//'installments' => (int) $post_from_form[ 'mercadopago_custom' ][ 'installments' ],
+		    //'payment_method_id' => $post_from_form[ 'mercadopago_custom' ][ 'paymentMethodId' ],
+		    'payer' => array(
+		    	'email' => $arr_info['billingemail']
+		    ),
+		    'external_reference' => get_option('mercadopago_custom_invoiceprefix') . $order_id,
+		    'statement_descriptor' => get_option('mercadopago_custom_statementdescriptor'),
+		    'binary_mode' => (get_option('mercadopago_custom_binary') == "active"),
+		    'additional_info' => array(
+		        'items' => $items,
+		        'payer' => $payer_additional_info,
+		        'shipments' => $shipments
+		    )
+	  	);
+
+		// Set sponsor ID
+		if ( get_option('mercadopago_custom_istestuser') == "no" ) {
+			switch (get_option('mercadopago_custom_siteid')) {
+				case 'MLA':
+					$sponsor_id = 219693774;
+					break;
+				case 'MLB':
+					$sponsor_id = 219691508;
+					break;
+				case 'MLC':
+					$sponsor_id = 219691655;
+					break;
+				case 'MCO':
+					$sponsor_id = 219695429;
+					break;
+				case 'MLM':
+					$sponsor_id = 219696864;
+					break;
+				case 'MPE':
+					$sponsor_id = 219692012;
+					break;
+				case 'MLV':
+					$sponsor_id = 219696139;
+					break;
+				default:
+					$sponsor_id = null;
+			}
+			if ($sponsor_id != null)
+				$payment_preference[ 'sponsor_id' ] = $sponsor_id;
+		}
+
+		return $payment_preference;
+
 	}
 
 	// Multi-language plugin
@@ -460,6 +716,7 @@ function form_mercadopago_custom() {
 	// labels
 	$form_labels = array(
 		"form" => array(
+			"pay_with_mp" => __( 'Pay With Mercado Pago', 'wpecomm-mercadopago-module' ),
 			"tax_fees_message" => __( 'Tax fees applicable in store', 'wpecomm-mercadopago-module' ),
 			"shipment_message" => __( 'Shipping service used by store', 'wpecomm-mercadopago-module' ),
 			"payment_converted" => __('Payment with converted currency', 'wpecomm-mercadopago-module' ),
@@ -468,48 +725,48 @@ function form_mercadopago_custom() {
 			"label_choose" => __( "Choose", "wpecomm-mercadopago-module" ),
 			"your_card" => __( "Your Card", 'wpecomm-mercadopago-module' ),
 			"other_cards" => __( "Other Cards", 'wpecomm-mercadopago-module' ),
-      "other_card" => __( "Other Card", 'wpecomm-mercadopago-module' ),
-      "ended_in" => __( "ended in", 'wpecomm-mercadopago-module' ),
+	      	"other_card" => __( "Other Card", 'wpecomm-mercadopago-module' ),
+	      	"ended_in" => __( "ended in", 'wpecomm-mercadopago-module' ),
 			"card_holder_placeholder" => __( " as it appears in your card ...", 'wpecomm-mercadopago-module' ),
-      "payment_method" => __( "Payment Method", 'wpecomm-mercadopago-module' ),
-      "credit_card_number" => __( "Credit card number", 'wpecomm-mercadopago-module' ),
-      "expiration_month" => __( "Expiration month", 'wpecomm-mercadopago-module' ),
-      "expiration_year" => __( "Expiration year", 'wpecomm-mercadopago-module' ),
-      "year" => __( "Year", 'wpecomm-mercadopago-module' ),
-      "month" => __( "Month", 'wpecomm-mercadopago-module' ),
-      "card_holder_name" => __( "Card holder name", 'wpecomm-mercadopago-module' ),
-      "security_code" => __( "Security code", 'wpecomm-mercadopago-module' ),
-      "document_type" => __( "Document Type", 'wpecomm-mercadopago-module' ),
-      "document_number" => __( "Document number", 'wpecomm-mercadopago-module' ),
-      "issuer" => __( "Issuer", 'wpecomm-mercadopago-module' ),
-      "installments" => __( "Installments", 'wpecomm-mercadopago-module' )
-  	),
-  	"error" => array(
-    	//card number
-      "205" => __( "Parameter cardNumber can not be null/empty", 'wpecomm-mercadopago-module' ),
-      "E301" => __( "Invalid Card Number", 'wpecomm-mercadopago-module' ),
-      //expiration date
-      "208" => __( "Invalid Expiration Date", 'wpecomm-mercadopago-module' ),
-      "209" => __( "Invalid Expiration Date", 'wpecomm-mercadopago-module' ),
-      "325" => __( "Invalid Expiration Date", 'wpecomm-mercadopago-module' ),
-      "326" => __( "Invalid Expiration Date", 'wpecomm-mercadopago-module' ),
-      //card holder name
-      "221" => __( "Parameter cardholderName can not be null/empty", 'wpecomm-mercadopago-module' ),
-      "316" => __( "Invalid Card Holder Name", 'wpecomm-mercadopago-module' ),
-      //security code
-      "224" => __( "Parameter securityCode can not be null/empty", 'wpecomm-mercadopago-module' ),
-      "E302" => __( "Invalid Security Code", 'wpecomm-mercadopago-module' ),
-      //doc type
-      "212" => __( "Parameter docType can not be null/empty", 'wpecomm-mercadopago-module' ),
-      "322" => __( "Invalid Document Type", 'wpecomm-mercadopago-module' ),
-      //doc number
-      "214" => __( "Parameter docNumber can not be null/empty", 'wpecomm-mercadopago-module' ),
-      "324" => __( "Invalid Document Number", 'wpecomm-mercadopago-module' ),
-      //doc sub type
-      "213" => __( "The parameter cardholder.document.subtype can not be null or empty", 'wpecomm-mercadopago-module' ),
-      "323" => __( "Invalid Document Sub Type", 'wpecomm-mercadopago-module' ),
-      //issuer
-      "220" => __( "Parameter cardIssuerId can not be null/empty", 'wpecomm-mercadopago-module' )
+			"payment_method" => __( "Payment Method", 'wpecomm-mercadopago-module' ),
+			"credit_card_number" => __( "Credit card number", 'wpecomm-mercadopago-module' ),
+			"expiration_month" => __( "Expiration month", 'wpecomm-mercadopago-module' ),
+			"expiration_year" => __( "Expiration year", 'wpecomm-mercadopago-module' ),
+			"year" => __( "Year", 'wpecomm-mercadopago-module' ),
+			"month" => __( "Month", 'wpecomm-mercadopago-module' ),
+			"card_holder_name" => __( "Card holder name", 'wpecomm-mercadopago-module' ),
+			"security_code" => __( "Security code", 'wpecomm-mercadopago-module' ),
+			"document_type" => __( "Document Type", 'wpecomm-mercadopago-module' ),
+			"document_number" => __( "Document number", 'wpecomm-mercadopago-module' ),
+			"issuer" => __( "Issuer", 'wpecomm-mercadopago-module' ),
+			"installments" => __( "Installments", 'wpecomm-mercadopago-module' )
+		),
+		"error" => array(
+			//card number
+			"205" => __( "Parameter cardNumber can not be null/empty", 'wpecomm-mercadopago-module' ),
+			"E301" => __( "Invalid Card Number", 'wpecomm-mercadopago-module' ),
+			//expiration date
+			"208" => __( "Invalid Expiration Date", 'wpecomm-mercadopago-module' ),
+			"209" => __( "Invalid Expiration Date", 'wpecomm-mercadopago-module' ),
+			"325" => __( "Invalid Expiration Date", 'wpecomm-mercadopago-module' ),
+			"326" => __( "Invalid Expiration Date", 'wpecomm-mercadopago-module' ),
+			//card holder name
+			"221" => __( "Parameter cardholderName can not be null/empty", 'wpecomm-mercadopago-module' ),
+			"316" => __( "Invalid Card Holder Name", 'wpecomm-mercadopago-module' ),
+			//security code
+			"224" => __( "Parameter securityCode can not be null/empty", 'wpecomm-mercadopago-module' ),
+			"E302" => __( "Invalid Security Code", 'wpecomm-mercadopago-module' ),
+			//doc type
+			"212" => __( "Parameter docType can not be null/empty", 'wpecomm-mercadopago-module' ),
+			"322" => __( "Invalid Document Type", 'wpecomm-mercadopago-module' ),
+			//doc number
+			"214" => __( "Parameter docNumber can not be null/empty", 'wpecomm-mercadopago-module' ),
+			"324" => __( "Invalid Document Number", 'wpecomm-mercadopago-module' ),
+			//doc sub type
+			"213" => __( "The parameter cardholder.document.subtype can not be null or empty", 'wpecomm-mercadopago-module' ),
+			"323" => __( "Invalid Document Sub Type", 'wpecomm-mercadopago-module' ),
+			//issuer
+			"220" => __( "Parameter cardIssuerId can not be null/empty", 'wpecomm-mercadopago-module' )
 		)
 	);
 
@@ -766,191 +1023,6 @@ function form_mercadopago_custom() {
 	FUNCTIONS TO PROCESS PAYMENT
 ================================================================================*/
 
-/*function function_mercadopago_custom($seperator, $sessionid) {
-
-	global $wpdb, $wpsc_cart;
-
-	// this grabs the purchase log id from the database that refers to the $sessionid
-	$purchase_log = $wpdb->get_row(
-		"SELECT * FROM `" . WPSC_TABLE_PURCHASE_LOGS .
-		"` WHERE `sessionid`= " . $this->cart_data['session_id'] . " LIMIT 1"
-		, ARRAY_A);
-
-	// this grabs the customer info using the $purchase_log from the previous SQL query
-	$usersql = "SELECT `" . WPSC_TABLE_SUBMITED_FORM_DATA . "`.value,
-		`" . WPSC_TABLE_CHECKOUT_FORMS . "`.`name`,
-		`" . WPSC_TABLE_CHECKOUT_FORMS . "`.`unique_name` FROM
-		`" . WPSC_TABLE_CHECKOUT_FORMS . "` LEFT JOIN
-		`" . WPSC_TABLE_SUBMITED_FORM_DATA . "` ON
-		`" . WPSC_TABLE_CHECKOUT_FORMS . "`.id =
-		`" . WPSC_TABLE_SUBMITED_FORM_DATA . "`.`form_id` WHERE
-		`" . WPSC_TABLE_SUBMITED_FORM_DATA . "`.`log_id`=" . $purchase_log['id'];
-	$userinfo = $wpdb->get_results($usersql, ARRAY_A);
-	$arr_info = array();
-	foreach ((array)$userinfo as $key => $value){
-		$arr_info[$value['unique_name']] = $value['value'];
-	}
-
-	// Here we build the array that contains ordered itens, from customer cart
-	$items = array();
-	$purchase_description = "";
-	if (sizeof($wpsc_cart->cart_items) > 0) {
-		foreach ($wpsc_cart->cart_items as $i => $item) {
-			if ($item->quantity > 0) {
-				$product = get_post($item->product_id);
-				$picture_url = 'https://www.mercadopago.com/org-img/MP3/home/logomp3.gif';
-				if ($item->thumbnail_image) {
-					foreach ($item->thumbnail_image as $key => $image) {
-						if ($key == 'guid') {
-							$picture_url = $image;
-							break;
-						}
-					}
-				}
-				$purchase_description =
-					$purchase_description . ' ' .
-					( $item->product_name . ' x ' . $item->quantity );
-				array_push($items, array(
-					'id' => $item->product_id,
-					'title' => ( $item->product_name . ' x ' . $item->quantity ),
-					'description' => sanitize_file_name( (
-						// This handles description width limit of Mercado Pago.
-						strlen( $product->post_content ) > 230 ?
-						substr( $product->post_content, 0, 230 ) . "..." :
-						$product->post_content
-					)),
-					'picture_url' => $picture_url,
-					'category_id' => get_option('mercadopago_custom_category'),
-					'quantity' => 1,
-					'unit_price' => (
-						((float)($item->unit_price)) *
-						(float)($item->quantity)
-					) * (
-						(float)get_option('mercadopago_custom_currencyratio') > 0 ?
-						(float)get_option('mercadopago_custom_currencyratio') : 1
-					)
-				));
-			}
-		}
-
-		// tax fees cost as an item
-		array_push($items, array(
-			'title' => get_option('mercadopago_custom_checkoutmessage1'),
-			'description' => get_option('mercadopago_custom_checkoutmessage1'),
-			'category_id' => get_option('mercadopago_custom_category'),
-			'quantity' => 1,
-			'unit_price' => (
-				((float)($wpsc_cart->total_tax))
-			) * (
-				(float)get_option('mercadopago_custom_currencyratio') > 0 ?
-				(float)get_option('mercadopago_custom_currencyratio') : 1
-			)
-		));
-
-		// shipment cost as an item
-		array_push($items, array(
-			'title' => $wpsc_cart->selected_shipping_option,
-			'description' => get_option('mercadopago_custom_checkoutmessage2'),
-			'category_id' => get_option('mercadopago_custom_category'),
-			'quantity' => 1,
-			'unit_price' => (
-				((float)($wpsc_cart->base_shipping)+(float)($wpsc_cart->total_item_shipping))
-			) * (
-				(float)get_option('mercadopago_custom_currencyratio') > 0 ?
-				(float)get_option('mercadopago_custom_currencyratio') : 1
-			)
-		));
-	}
-
-	// Build additional information from the customer data
-	$billing_details = wpsc_get_customer_meta();
-	$order_id = $billing_details['_wpsc_cart.log_id'][0];
-  $payer_additional_info = array(
-    'first_name' => $arr_info['billingfirstname'],
-    'last_name' => $arr_info['billinglastname'],
-    //'registration_date' =>
-    'phone'	=> array(
-  	//'area_code' =>
-			'number' => $arr_info['billingphone']
-		),
-      'address' => array(
-			'zip_code' => $arr_info['billingpostcode'],
-			//'street_number' =>
-			'street_name' => $arr_info['billingaddress'] . ' / ' .
-				$arr_info['billingcity'] . ' ' .
-				$arr_info['billingstate'] . ' ' .
-				$arr_info['billingcountry']
-		)
-  );
-
-  // Create the shipment address information set
-  $shipments = array(
-  	'receiver_address' => array(
-  		'zip_code' => $arr_info['shippingpostcode'],
-  		//'street_number' =>
-  		'street_name' => $arr_info['shippingaddress'] . ' ' .
-  			$arr_info['shippingcity'] . ' ' .
-  			$arr_info['shippingstate'] . ' ' .
-  			$arr_info['shippingcountry'],
-  		//'floor' =>
-  		'apartment' => $arr_info['shippingfirstname']
-  	)
-  );
-
-  // The payment preference
-  $payment_preference = array (
-  	'transaction_amount' => (float) number_format( $wpsc_cart->calculate_total_price() * (
-			(float)get_option('mercadopago_custom_currencyratio') > 0 ?
-			(float)get_option('mercadopago_custom_currencyratio') : 1
-		), 2 ),
-  	//'token' => $post_from_form[ 'mercadopago_custom' ][ 'token' ],
-  	'description' => $purchase_description,
-  	//'installments' => (int) $post_from_form[ 'mercadopago_custom' ][ 'installments' ],
-    //'payment_method_id' => $post_from_form[ 'mercadopago_custom' ][ 'paymentMethodId' ],
-    'payer' => array(
-    	'email' => $arr_info['billingemail']
-    ),
-    'external_reference' => get_option('mercadopago_custom_invoiceprefix') . $order_id,
-    'statement_descriptor' => get_option('mercadopago_custom_statementdescriptor'),
-    'binary_mode' => (get_option('mercadopago_custom_binary') == "active"),
-    'additional_info' => array(
-        'items' => $items,
-        'payer' => $payer_additional_info,
-        'shipments' => $shipments
-    )
-  );
-
-  // Set sponsor ID
-	if ( get_option('mercadopago_custom_istestuser') == "no" ) {
-		switch (get_option('mercadopago_custom_siteid')) {
-			case 'MLA':
-				$sponsor_id = 219693774;
-				break;
-			case 'MLB':
-				$sponsor_id = 219691508;
-				break;
-			case 'MLC':
-				$sponsor_id = 219691655;
-				break;
-			case 'MCO':
-				$sponsor_id = 219695429;
-				break;
-			case 'MLM':
-				$sponsor_id = 219696864;
-				break;
-			case 'MPE':
-				$sponsor_id = 219692012;
-				break;
-			case 'MLV':
-				$sponsor_id = 219696139;
-				break;
-			default:
-				$sponsor_id = null;
-		}
-		if ($sponsor_id != null)
-			$payment_preference[ 'sponsor_id' ] = $sponsor_id;
-	}
-	*/
 
   //=============================================================================
 
