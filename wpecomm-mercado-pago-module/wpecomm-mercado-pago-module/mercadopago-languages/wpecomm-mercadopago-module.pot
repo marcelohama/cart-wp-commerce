@@ -372,3 +372,6 @@ msgstr ""
 
 msgid "Payment Method"
 msgstr ""
+
+msgid "Pay With Mercado Pago"
+msgstr ""

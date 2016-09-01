@@ -638,9 +638,15 @@ function function_mercadopago_basic($seperator, $sessionid) {
 			)
 		),
 		'back_urls' => array(
-			'success' => workaroundAmperSandBug( esc_url( get_site_url() ) ),
-			'failure' => workaroundAmperSandBug( esc_url( get_site_url() ) ),
-			'pending' => workaroundAmperSandBug( esc_url( get_site_url() ) )
+			'success' => workaroundAmperSandBug( esc_url( add_query_arg(
+				'sessionid', $sessionid, get_option( 'transact_url' )
+			) ) ),
+			'failure' => workaroundAmperSandBug( esc_url( add_query_arg(
+				'sessionid', $sessionid, get_option( 'transact_url' )
+			) ) ),
+			'pending' => workaroundAmperSandBug( esc_url( add_query_arg(
+				'sessionid', $sessionid, get_option( 'transact_url' )
+			) ) )
 		),
 		//'marketplace' =>
     //'marketplace_fee' =>

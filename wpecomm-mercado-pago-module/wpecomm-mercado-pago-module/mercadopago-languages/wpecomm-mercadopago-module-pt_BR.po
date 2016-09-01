@@ -373,3 +373,6 @@ msgstr "Pagamento com moeda convertida"
 
 msgid "Payment Method"
 msgstr "Meio de Pagamento"
+
+msgid "Pay With Mercado Pago"
+msgstr "Pagar com Mercado Pago"
