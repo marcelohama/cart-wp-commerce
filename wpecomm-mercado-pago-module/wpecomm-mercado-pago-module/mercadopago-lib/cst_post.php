@@ -3,12 +3,16 @@
 /*ini_set('display_errors',1);
 ini_set('display_startup_erros',1);
 
-error_reporting(E_ALL);
+error_reporting(E_ALL);*/
 
 include "mercadopago.php";
+//include "../mercadopago-custom.php";
 
 $params_mercadopago = $_REQUEST['mercadopago_custom'];
-$mercadopago = new MP(MercadoPagoTest::getAccessTokenSellerTest($params_mercadopago['site_id']));
+
+global $wpdb, $wpsc_cart;
+echo "WPSC_CART = " . json_encode($wpsc_cart, JSON_PRETTY_PRINT);
+/*$mercadopago = new MP(MercadoPagoTest::getAccessTokenSellerTest($params_mercadopago['site_id']));
 if($params_mercadopago['paymentMethodId'] == ""){
   $params_mercadopago['paymentMethodId'] = $params_mercadopago['paymentMethodSelector'];
 }
@@ -68,8 +72,6 @@ $payment['metadata']['token'] = $params_mercadopago['token'];
 $payment['metadata']['customer_id'] = $customer['id'];
 $payment = $mercadopago->create_payment($payment);*/
 ?>
-
-<a href="index.php?site_id=<?php echo $params_mercadopago['site_id']; ?>"><?php echo $params_mercadopago['site_id']; ?></a>
 
 <br/>
 <br/>

@@ -12,6 +12,41 @@
 
 include_once "mercadopago-lib/mercadopago.php";
 
+if (isset($_REQUEST['mercadopago_custom'])) {
+	//header( 'HTTP/1.1 200 OK' );
+  //header( 'Content-Type: application/json' );
+  //echo json_encode( $response );
+  /*echo json_decode(stripslashes(
+		preg_replace('/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
+			$_REQUEST['mercadopago_custom']['arr_info']
+		))
+	), true);*/
+
+	//$exported_wpsc_cart = unserialize($_REQUEST['mercadopago_custom']['wpsc_cart']);
+
+	/*$exported_wpsc_cart = (stripslashes(
+		preg_replace('/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
+			$_REQUEST['mercadopago_custom']['wpsc_cart']
+		))
+	));*/
+
+	$exported_wpsc_cart = html_entity_decode($_REQUEST['mercadopago_custom']['wpsc_cart']);
+	$exported_wpsc_cart = unserialize($exported_wpsc_cart);
+	//$exported_wpsc_cart = print_r_reverse(stripslashes(trim(preg_replace('/\s\s+/', ' ', $exported_wpsc_cart))));
+	/*$wpsc_cart = json_encode( print_r_reverse(
+		stripslashes(
+			preg_replace('/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
+				$exported_wpsc_cart->scalar
+			))
+		))
+	);*/
+
+	//echo json_encode( $exported_wpsc_cart, JSON_PRETTY_PRINT );
+		//->selected_shipping_method;
+
+	exit();
+}
+
 $nzshpcrt_gateways[$num] = array(
 	'name' =>  __( 'Mercado Pago - Credit Card', 'wpecomm-mercadopago-module' ),
 	'api_version' => 2.0,
@@ -110,6 +145,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 	    "MLV" => 'MLV/standard.jpg',
 	    "MLM" => 'MLM/standard.jpg'
 	  );
+	  $serialized_cart = htmlentities(serialize($wpsc_cart));
 
 		// header
 		$payment_header =
@@ -122,7 +158,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 			</div>';
 		// payment method
 		$mercadopago_form =
-			'<form action="' . plugins_url('wpsc-merchants/mercadopago-lib/cst_post.php', plugin_dir_path(__FILE__)) .
+			'<form action="' . //plugins_url('wpsc-merchants/mercadopago-lib/cst_post.php', plugin_dir_path(__FILE__)) .
 				'" method="post"><fieldset style="background:white;">
 
 				<div id="mercadopago-form-customer-and-card" style="padding:0px 36px 0px 36px;">
@@ -247,6 +283,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 					<input type="hidden" id="cardTruncated" name="mercadopago_custom[cardTruncated]"/>
 					<input type="hidden" id="CustomerAndCard" name="mercadopago_custom[CustomerAndCard]"/>
 					<input type="hidden" id="CustomerId" value="' . $customerId . '" name="mercadopago_custom[CustomerId]"/>
+					<input type="hidden" id="wpsc_cart" value="' . print_r($serialized_cart, true) . '" name="mercadopago_custom[wpsc_cart]"/>
 		  	</div>
 
 			</fieldset></form>';
@@ -293,8 +330,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 		  	MPv1.Initialize(mercadopago_site_id, mercadopago_public_key);
 			</script>';
 
-		$page_html = "";
-		$page_html .=
+		$page_html =
 			'<head>' .
 				'<link rel="stylesheet" id="twentysixteen-style-css"
 					href="https://modules-mercadopago.rhcloud.com/wp-content/themes/twentysixteen/style.css?ver=4.5.3" type="text/css" media="all">' .
@@ -307,8 +343,6 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 		$page_html .= '<div style="width: 600px;">' . $mercadopago_form . '</div>';
 		$page_html .= $page_js;
 		echo $page_html;
-
-		;
 
 		//$this->set_purchase_processed_by_purchid(2);
 	 	//$this->go_to_transaction_results($this->cart_data['session_id']);
@@ -371,21 +405,6 @@ function submit_mercadopago_custom() {
 	if (isset($_POST['mercadopago_custom_checkoutmessage1'])) {
 		update_option('mercadopago_custom_checkoutmessage1', trim($_POST['mercadopago_custom_checkoutmessage1']));
 	}
-	/*if (isset($_POST['mercadopago_custom_checkoutmessage2'])) {
-		update_option('mercadopago_custom_checkoutmessage2', trim($_POST['mercadopago_custom_checkoutmessage2']));
-	}
-	if (isset($_POST['mercadopago_custom_checkoutmessage3'])) {
-		update_option('mercadopago_custom_checkoutmessage3', trim($_POST['mercadopago_custom_checkoutmessage3']));
-	}
-	if (isset($_POST['mercadopago_custom_checkoutmessage4'])) {
-		update_option('mercadopago_custom_checkoutmessage4', trim($_POST['mercadopago_custom_checkoutmessage4']));
-	}
-	if (isset($_POST['mercadopago_custom_checkoutmessage5'])) {
-		update_option('mercadopago_custom_checkoutmessage5', trim($_POST['mercadopago_custom_checkoutmessage5']));
-	}
-	if (isset($_POST['mercadopago_custom_checkoutmessage6'])) {
-		update_option('mercadopago_custom_checkoutmessage6', trim($_POST['mercadopago_custom_checkoutmessage6']));
-	}*/
 	if (isset($_POST['mercadopago_custom_istestuser'])) {
 		update_option('mercadopago_custom_istestuser', trim($_POST['mercadopago_custom_istestuser']));
 	}
@@ -1346,6 +1365,53 @@ function isSupportedCurrency_custom($site_id) {
 // Fix to URL Problem : #038; replaces & and breaks the navigation
 function workaroundAmperSandBug_custom( $link ) {
 	return str_replace('&#038;', '&', $link);
+}
+
+function print_r_reverse($in) {
+  $lines = explode("\n", trim($in));
+  if (trim($lines[0]) != 'Array') {
+    // bottomed out to something that isn't an array
+    return $in;
+  } else {
+    // this is an array, lets parse it
+    if (preg_match("/(\s{5,})\(/", $lines[1], $match)) {
+      // this is a tested array/recursive call to this function
+      // take a set of spaces off the beginning
+      $spaces = $match[1];
+      $spaces_length = strlen($spaces);
+      $lines_total = count($lines);
+      for ($i = 0; $i < $lines_total; $i++) {
+        if (substr($lines[$i], 0, $spaces_length) == $spaces) {
+          $lines[$i] = substr($lines[$i], $spaces_length);
+        }
+      }
+    }
+    array_shift($lines); // Array
+    array_shift($lines); // (
+    array_pop($lines); // )
+    $in = implode("\n", $lines);
+    // make sure we only match stuff with 4 preceding spaces (stuff for this array and not a nested one)
+    preg_match_all("/^\s{4}\[(.+?)\] \=\> /m", $in, $matches, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
+    $pos = array();
+    $previous_key = '';
+    $in_length = strlen($in);
+    // store the following in $pos:
+    // array with key = key of the parsed array's item
+    // value = array(start position in $in, $end position in $in)
+    foreach ($matches as $match) {
+      $key = $match[1][0];
+      $start = $match[0][1] + strlen($match[0][0]);
+      $pos[$key] = array($start, $in_length);
+      if ($previous_key != '') $pos[$previous_key][1] = $match[0][1] - 1;
+        $previous_key = $key;
+    }
+    $ret = array();
+    foreach ($pos as $key => $where) {
+      // recursively see if the parsed out value is an array too
+      $ret[$key] = print_r_reverse(substr($in, $where[0], $where[1] - $where[0]));
+    }
+    return $ret;
+	}
 }
 
 function debug_to_console_custom($data) {
