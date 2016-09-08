@@ -61,7 +61,7 @@
       token: "#token",
       cardTruncated: "#cardTruncated",
       site_id: "#site_id",
-      CustomerAndCard: "#CustomerAndCard",
+      customerAndCard: "#customerAndCard",
 
       box_loading: "#mp-box-loading",
       submit: "#submit",
@@ -534,7 +534,7 @@
         MPv1.validateInputsCreateToken();
       }
 
-      document.querySelector(MPv1.selectors.CustomerAndCard).value = MPv1.customer_and_card.status;
+      document.querySelector(MPv1.selectors.customerAndCard).value = MPv1.customer_and_card.status;
     }
 
     MPv1.getForm = function(){

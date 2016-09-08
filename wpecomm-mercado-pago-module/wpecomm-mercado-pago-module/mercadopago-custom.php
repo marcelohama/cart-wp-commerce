@@ -657,155 +657,155 @@ function form_mercadopago_custom() {
 
    // send output to generate settings page
    $output = "
-   <tr>
-      <td></td>
-      <td><h3><strong>" . __('Mercado Pago Credentials', 'wpecomm-mercadopago-module' ) . "</strong></h3></td>
-   </tr>
-   <tr>
-      <td>
-         <img width='200' height='52' src='" .
-            plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) .
-         "'>
-      </td>
-      <td>
-         <input type='hidden' size='60' value='" . $result['site_id'] . "' name='mercadopago_custom_siteid' />
-         <input type='hidden' size='60' value='" .
-            json_encode( $form_labels ) .
-            "' name='mercadopago_custom_checkoutmessage1' />
-         <input type='hidden' size='60' value='" . $result['is_test_user'] . "' name='mercadopago_custom_istestuser' />
-         <input type='hidden' size='60' value='" . $result['currency_ratio'] . "' name='mercadopago_custom_currencyratio' />
-         <p><a href='https://wordpress.org/support/view/plugin-reviews/wpecomm-mercado-pago-module?filter=5#postform' target='_blank' class='button button-primary'>" . sprintf(
-               __( 'Please, rate us %s on WordPress.org and give your feedback to help improve this module!', 'wpecomm-mercadopago-module' ),
-               '&#9733;&#9733;&#9733;&#9733;&#9733;'
-               ) . "
-         </a></p><br>
-         <p class='description'>" .
-            sprintf( '%s', $credentials_message ) . '<br>' . sprintf(
-               __( 'You can obtain your credentials for', 'wpecomm-mercadopago-module' ) . ' %s.',
-               $api_secret_locale ) . "
-         </p>
-      </td>
-   </tr>
-   <tr>
-      <td>" . __('Public Key', 'wpecomm-mercadopago-module' ) . "</td>
-      <td>
-         <input type='text' size='60' value='" . get_option('mercadopago_custom_publickey') . "' name='mercadopago_custom_publickey' />
-         <p class='description'>
-            " . __( "Insert your Mercado Pago Public Key.", 'wpecomm-mercadopago-module' ) . "
-         </p>
-      </td>
-   </tr>
-   <tr>
-      <td>" . __('Access Token', 'wpecomm-mercadopago-module' ) . "</td>
-      <td>
-         <input type='text' size='60' value='" . get_option('mercadopago_custom_accesstoken') . "' name='mercadopago_custom_accesstoken' />
-         <p class='description'>
-            " . __( "Insert your Mercado Pago Access Token.", 'wpecomm-mercadopago-module' ) . "
-         </p>
-      </td>
-   </tr>
-   <tr>
-      <td></td>
-      <td><h3><strong>" . __('Checkout Options', 'wpecomm-mercadopago-module' ) . "</strong></h3></td>
-   </tr>
-   <tr>
-      <td>" . __('Statement Descriptor', 'wpecomm-mercadopago-module' ) . "</td>
-      <td>
-         <input type='text' size='60' value='" . (get_option( 'mercadopago_custom_statementdescriptor') == "" ?
-            "Mercado Pago" : get_option( 'mercadopago_custom_statementdescriptor')) . "' name='mercadopago_custom_statementdescriptor' />
-         <p class='description'>" .
-            __( 'The description that will be shown in your customer\'s invoice.', 'wpecomm-mercadopago-module' ) . "
-         </p>
-      </td>
-   </tr>
-   <tr>
-      <td>" . __('Binary Mode', 'wpecomm-mercadopago-module') . "
-      </td>
-      <td>" .
-         binary() . "
-         <p class='description'>" . __(
-            "When charging a credit card, only [approved] or [reject] status will be taken.",
-            'wpecomm-mercadopago-module'
-         ) . "</p>
-      </td>
-   </tr>
-   <tr>
-      <td>" . __('Store Category', 'wpecomm-mercadopago-module' ) . "</td>
-      <td>" .
-         category_custom() . "
-         <p class='description'>" .
-            __( "Define which type of products your store sells.", 'wpecomm-mercadopago-module' ) . "
-         </p>
-      </td>
-   </tr>
-   <tr>
-      <td>" . __('Store Identificator', 'wpecomm-mercadopago-module' ) . "</td>
-      <td>
-         <input type='text' size='60' value='" . (get_option( 'mercadopago_custom_invoiceprefix') == "" ? "WPeComm-" : get_option( 'mercadopago_custom_invoiceprefix')) . "' name='mercadopago_custom_invoiceprefix' />
-         <p class='description'>" .
-            __( "Please, inform a prefix to your store.", "wpecomm-mercadopago-module" ) . ' ' .
-            __( "If you use your Mercado Pago account on multiple stores you should make sure that this prefix is unique as Mercado Pago will not allow orders with same identificators.", "wpecomm-mercadopago-module" ) . "
-         </p>
-      </td>
-   </tr>
-   <tr>
-      <td>" . __('URL Approved Payment', 'wpecomm-mercadopago-module') . "</td>
-      <td>
-         <input name='mercadopago_custom_url_sucess' type='text' value='" . $url_sucess . "'/>
-         <p class='description'>" .
-            __( 'This is the URL where the customer is redirected if his payment is approved.',
-               'wpecomm-mercadopago-module' ) . "
-         </p>
-      </td>
-   </tr>
-   <tr>
-      <td>" . __('URL Pending Payment', 'wpecomm-mercadopago-module') . "</td>
-      <td>
-         <input name='mercadopago_custom_url_pending' type='text' value='" . $url_pending . "'/>
-         <p class='description'>" .
-            __( 'This is the URL where the customer is redirected if his payment is in process.',
-               'wpecomm-mercadopago-module' ) . "
-         </p>
-      </td>
-   </tr>
-   <tr>
-      <td></td>
-      <td><h3><strong>" . __('Payment Options', 'wpecomm-mercadopago-module') . "</strong></h3></td>
-   </tr>
-   <tr>
-      <td>" . __('Currency Conversion', 'wpecomm-mercadopago-module') . "</td>
-      <td>" .
-         currency_conversion_custom() . "
-         <p class='description'>" .
-            __('If the used currency in WPeCommerce is different or not supported by Mercado Pago, convert values of your transactions using Mercado Pago currency ratio', 'wpecomm-mercadopago-module') . "<br >" .
-            __(sprintf('%s', $currency_message)) . "
-         </p>
-      </td>
-   </tr>
-   <tr>
-      <td></td>
-      <td><h3><strong>" . __('Test and Debug Options', 'wpecomm-mercadopago-module') . "</strong></h3></td>
-   </tr>
-   <tr>
-      <td>" . __('Enable Sandbox', 'wpecomm-mercadopago-module') . "
-      </td>
-      <td>" .
-         sandbox_custom() . "
-         <p class='description'>" . __(
-            "This option allows you to test payments inside a sandbox environment.",
-            'wpecomm-mercadopago-module'
-         ) . "</p>
-      </td>
-   </tr>
-   <tr>
-      <td>" . __('Debug mode', 'wpecomm-mercadopago-module') . "</td>
-      <td>" .
-         debugs_custom() . "
-         <p class='description'>" .
-         __('Enable to display log messages in browser console (not recommended in production environment)', 'wpecomm-mercadopago-module') . "
-         </p>
-      </td>
-   </tr>\n";
+      <tr>
+         <td></td>
+         <td><h3><strong>" . __('Mercado Pago Credentials', 'wpecomm-mercadopago-module' ) . "</strong></h3></td>
+      </tr>
+      <tr>
+         <td>
+            <img width='200' height='52' src='" .
+               plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) .
+            "'>
+         </td>
+         <td>
+            <input type='hidden' size='60' value='" . $result['site_id'] . "' name='mercadopago_custom_siteid' />
+            <input type='hidden' size='60' value='" .
+               json_encode( $form_labels ) .
+               "' name='mercadopago_custom_checkoutmessage1' />
+            <input type='hidden' size='60' value='" . $result['is_test_user'] . "' name='mercadopago_custom_istestuser' />
+            <input type='hidden' size='60' value='" . $result['currency_ratio'] . "' name='mercadopago_custom_currencyratio' />
+            <p><a href='https://wordpress.org/support/view/plugin-reviews/wpecomm-mercado-pago-module?filter=5#postform' target='_blank' class='button button-primary'>" . sprintf(
+                  __( 'Please, rate us %s on WordPress.org and give your feedback to help improve this module!', 'wpecomm-mercadopago-module' ),
+                  '&#9733;&#9733;&#9733;&#9733;&#9733;'
+                  ) . "
+            </a></p><br>
+            <p class='description'>" .
+               sprintf( '%s', $credentials_message ) . '<br>' . sprintf(
+                  __( 'You can obtain your credentials for', 'wpecomm-mercadopago-module' ) . ' %s.',
+                  $api_secret_locale ) . "
+            </p>
+         </td>
+      </tr>
+      <tr>
+         <td>" . __('Public Key', 'wpecomm-mercadopago-module' ) . "</td>
+         <td>
+            <input type='text' size='60' value='" . get_option('mercadopago_custom_publickey') . "' name='mercadopago_custom_publickey' />
+            <p class='description'>
+               " . __( "Insert your Mercado Pago Public Key.", 'wpecomm-mercadopago-module' ) . "
+            </p>
+         </td>
+      </tr>
+      <tr>
+         <td>" . __('Access Token', 'wpecomm-mercadopago-module' ) . "</td>
+         <td>
+            <input type='text' size='60' value='" . get_option('mercadopago_custom_accesstoken') . "' name='mercadopago_custom_accesstoken' />
+            <p class='description'>
+               " . __( "Insert your Mercado Pago Access Token.", 'wpecomm-mercadopago-module' ) . "
+            </p>
+         </td>
+      </tr>
+      <tr>
+         <td></td>
+         <td><h3><strong>" . __('Checkout Options', 'wpecomm-mercadopago-module' ) . "</strong></h3></td>
+      </tr>
+      <tr>
+         <td>" . __('Statement Descriptor', 'wpecomm-mercadopago-module' ) . "</td>
+         <td>
+            <input type='text' size='60' value='" . (get_option( 'mercadopago_custom_statementdescriptor') == "" ?
+               "Mercado Pago" : get_option( 'mercadopago_custom_statementdescriptor')) . "' name='mercadopago_custom_statementdescriptor' />
+            <p class='description'>" .
+               __( 'The description that will be shown in your customer\'s invoice.', 'wpecomm-mercadopago-module' ) . "
+            </p>
+         </td>
+      </tr>
+      <tr>
+         <td>" . __('Binary Mode', 'wpecomm-mercadopago-module') . "
+         </td>
+         <td>" .
+            binary() . "
+            <p class='description'>" . __(
+               "When charging a credit card, only [approved] or [reject] status will be taken.",
+               'wpecomm-mercadopago-module'
+            ) . "</p>
+         </td>
+      </tr>
+      <tr>
+         <td>" . __('Store Category', 'wpecomm-mercadopago-module' ) . "</td>
+         <td>" .
+            category_custom() . "
+            <p class='description'>" .
+               __( "Define which type of products your store sells.", 'wpecomm-mercadopago-module' ) . "
+            </p>
+         </td>
+      </tr>
+      <tr>
+         <td>" . __('Store Identificator', 'wpecomm-mercadopago-module' ) . "</td>
+         <td>
+            <input type='text' size='60' value='" . (get_option( 'mercadopago_custom_invoiceprefix') == "" ? "WPeComm-" : get_option( 'mercadopago_custom_invoiceprefix')) . "' name='mercadopago_custom_invoiceprefix' />
+            <p class='description'>" .
+               __( "Please, inform a prefix to your store.", "wpecomm-mercadopago-module" ) . ' ' .
+               __( "If you use your Mercado Pago account on multiple stores you should make sure that this prefix is unique as Mercado Pago will not allow orders with same identificators.", "wpecomm-mercadopago-module" ) . "
+            </p>
+         </td>
+      </tr>
+      <tr>
+         <td>" . __('URL Approved Payment', 'wpecomm-mercadopago-module') . "</td>
+         <td>
+            <input name='mercadopago_custom_url_sucess' type='text' value='" . $url_sucess . "'/>
+            <p class='description'>" .
+               __( 'This is the URL where the customer is redirected if his payment is approved.',
+                  'wpecomm-mercadopago-module' ) . "
+            </p>
+         </td>
+      </tr>
+      <tr>
+         <td>" . __('URL Pending Payment', 'wpecomm-mercadopago-module') . "</td>
+         <td>
+            <input name='mercadopago_custom_url_pending' type='text' value='" . $url_pending . "'/>
+            <p class='description'>" .
+               __( 'This is the URL where the customer is redirected if his payment is in process.',
+                  'wpecomm-mercadopago-module' ) . "
+            </p>
+         </td>
+      </tr>
+      <tr>
+         <td></td>
+         <td><h3><strong>" . __('Payment Options', 'wpecomm-mercadopago-module') . "</strong></h3></td>
+      </tr>
+      <tr>
+         <td>" . __('Currency Conversion', 'wpecomm-mercadopago-module') . "</td>
+         <td>" .
+            currency_conversion_custom() . "
+            <p class='description'>" .
+               __('If the used currency in WPeCommerce is different or not supported by Mercado Pago, convert values of your transactions using Mercado Pago currency ratio', 'wpecomm-mercadopago-module') . "<br >" .
+               __(sprintf('%s', $currency_message)) . "
+            </p>
+         </td>
+      </tr>
+      <tr>
+         <td></td>
+         <td><h3><strong>" . __('Test and Debug Options', 'wpecomm-mercadopago-module') . "</strong></h3></td>
+      </tr>
+      <tr>
+         <td>" . __('Enable Sandbox', 'wpecomm-mercadopago-module') . "
+         </td>
+         <td>" .
+            sandbox_custom() . "
+            <p class='description'>" . __(
+               "This option allows you to test payments inside a sandbox environment.",
+               'wpecomm-mercadopago-module'
+            ) . "</p>
+         </td>
+      </tr>
+      <tr>
+         <td>" . __('Debug mode', 'wpecomm-mercadopago-module') . "</td>
+         <td>" .
+            debugs_custom() . "
+            <p class='description'>" .
+            __('Enable to display log messages in browser console (not recommended in production environment)', 'wpecomm-mercadopago-module') . "
+            </p>
+         </td>
+      </tr>\n";
    return $output;
 }
 
@@ -1056,13 +1056,13 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
          </div>
 
          <div class="mp-box-inputs mp-col-100" id="mercadopago-utilities" style="padding:0px 36px 0px 36px;">
-            <input type="text" id="site_id" name="mercadopago_custom[site_id]"/>
-            <input type="text" id="amount" value="' . $amount . '" name="mercadopago_custom[amount]"/>
-            <input type="text" id="paymentMethodId" name="mercadopago_custom[paymentMethodId]"/>
-            <input type="text" id="token" name="mercadopago_custom[token]"/>
-            <input type="text" id="cardTruncated" name="mercadopago_custom[cardTruncated]"/>
-            <input type="text" id="customerAndCard" name="mercadopago_custom[CustomerAndCard]"/>
-            <input type="text" id="customerId" value="' . $customerId . '" name="mercadopago_custom[customerId]"/>
+            <input type="hidden" id="site_id" name="mercadopago_custom[site_id]"/>
+            <input type="hidden" id="amount" value="' . $amount . '" name="mercadopago_custom[amount]"/>
+            <input type="hidden" id="paymentMethodId" name="mercadopago_custom[paymentMethodId]"/>
+            <input type="hidden" id="token" name="mercadopago_custom[token]"/>
+            <input type="hidden" id="cardTruncated" name="mercadopago_custom[cardTruncated]"/>
+            <input type="hidden" id="customerAndCard" name="mercadopago_custom[CustomerAndCard]"/>
+            <input type="hidden" id="customerId" value="' . $customerId . '" name="mercadopago_custom[customerId]"/>
          </div>
 
       </fieldset></form>';
@@ -1091,7 +1091,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
                MPv1.createTokenByEvent();
                MPv1.validateInputsCreateToken();
             }
-            document.querySelector(MPv1.selectors.CustomerAndCard).value = MPv1.customer_and_card.status;
+            document.querySelector(MPv1.selectors.customerAndCard).value = MPv1.customer_and_card.status;
          }
          MPv1.getAmount = function() {
             return document.querySelector(MPv1.selectors.amount).value;
