@@ -371,34 +371,15 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
     * @access private
     */
    function parse_gateway_notification() {
-      /*$paypal_url = get_option( 'mercadopago_multiple_url' );
+      // TODO: implement
+   }
 
-      $received_values = array( );
-      $received_values['cmd'] = '_notify-validate';
-      $received_values += stripslashes_deep ( $_POST );
-
-      $options = array(
-         'timeout'    => 20,
-         'body'       => $received_values,
-         'httpversion' => '1.1',
-         'user-agent' => ('WP eCommerce/' . WPSC_PRESENTABLE_VERSION)
-      );*/
-
-      // process IPN messages
-      $data = $this->check_ipn_request_is_valid( $_GET );
-      if ( $data ) {
-         header( 'HTTP/1.1 200 OK' );
-         //do_action( 'valid_mercadopagocustom_ipn_request', $data );
-      }
-
-      /*$response = wp_safe_remote_post( $paypal_url, $options );
-
-      if ( strpos( $response['body'], 'VERIFIED' ) !== false ) {
-         $this->paypal_ipn_values = $received_values;
-         $this->session_id = $received_values['invoice'];
-      } else {
-         exit( "IPN Request Failure" );
-      }*/
+   /**
+    * process_gateway_notification method, receives data from the payment gateway
+    * @access public
+    */
+   function process_gateway_notification() {
+      // TODO: implement
    }
 
    function check_ipn_request_is_valid( $data ) {
@@ -582,11 +563,6 @@ function getImagePath( $image_name ) {
  */
 function form_mercadopago_custom() {
    global $wpdb, $wpsc_gateways;
-
-   // TODO: translations:
-   // Your payment failed to be processed.<br/>Are you sure you have set all information?
-   // Your payment could not be completed. Please, try again.
-   // Return and Try Again
 
    // labels
    $form_labels = array(
@@ -906,7 +882,6 @@ function submit_mercadopago_custom() {
    if (isset($_POST['mercadopago_custom_siteid'])) {
       update_option('mercadopago_custom_siteid', trim($_POST['mercadopago_custom_siteid']));
    }
-   // TODO: find a better way to pass translated fields to customer view
    if (isset($_POST['mercadopago_custom_checkoutmessage1'])) {
       update_option('mercadopago_custom_checkoutmessage1', trim($_POST['mercadopago_custom_checkoutmessage1']));
    }
