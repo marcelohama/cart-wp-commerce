@@ -21,15 +21,11 @@ $nzshpcrt_gateways[$num] = array(
    'display_name' => __( 'Mercado Pago - Credit Card', 'wpecomm-mercadopago-module' ),
    'wp_admin_cannot_cancel' => false,
    'requirements' => array(
-      /// so that you can restrict merchant modules to PHP 5, if you use PHP 5 features
       'php_version' => 5.6,
-       /// for modules that may not be present, like curl
       'extra_modules' => array()
    ),
-   // All array members below here are legacy, and use the code in mercadopago_multiple.php
    'form' => 'form_mercadopago_custom',
    'submit_function' => 'submit_mercadopago_custom',
-   //'function' => 'function_mercadopago_custom',
    'internalname' => 'WPSC_Merchant_MercadoPago_Custom'
 );
 
@@ -382,42 +378,6 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
       // TODO: implement
    }
 
-   function check_ipn_request_is_valid( $data ) {
-      if ( !isset( $data[ 'data_id' ] ) || !isset( $data[ 'type' ] ) ) {
-         // at least, check if its a v0 ipn
-         if ( !isset( $data[ 'id' ] ) || !isset( $data[ 'topic' ] ) ) {
-            wp_die( __( 'Mercado Pago Request Failure', 'woocommerce-mercadopago-module' ) );
-         } else {
-            header( 'HTTP/1.1 200 OK' );
-         }
-         // No ID? No process!
-         return false;
-      }
-
-      $mp = new MP(
-         get_option('mercadopago_custom_accesstoken')
-      );
-      if ( 'yes' == $this->sandbox )
-         $mp->sandbox_mode( true );
-      else
-         $mp->sandbox_mode( false );
-      try {
-         $access_token = array( "access_token" => $this->mp->get_access_token() );
-         if ( $data[ "type" ] == 'payment' ) {
-            $payment_info = $this->mp->get( "/v1/payments/" . $data[ "data_id" ], $access_token, false );
-            if ( !is_wp_error( $payment_info ) &&
-               ( $payment_info[ "status" ] == 200 || $payment_info[ "status" ] == 201 ) ) {
-               return $payment_info[ 'response' ];
-            } else {
-               return false;
-            }
-         }
-      } catch ( MercadoPagoException $e ) {
-         return false;
-      }
-      return true;
-   }
-
 }
 
 function _wpsc_filter_mercadopago_merchant_customer_notification_raw_message( $message, $notification ) {
@@ -546,7 +506,7 @@ function workaroundAmperSandBug_custom( $link ) {
    return str_replace('&#038;', '&', $link);
 }
 
-function getImagePath( $image_name ) {
+function getImagePath_custom( $image_name ) {
    return plugins_url( 'wpsc-merchants/mercadopago-images/' . $image_name, plugin_dir_path( __FILE__ ) );
 }
 
@@ -774,8 +734,17 @@ function form_mercadopago_custom() {
                __( 'The description that will be shown in your customer\'s invoice.', 'wpecomm-mercadopago-module' ) . "
             </p>
          </td>
-      </tr>
-      <tr>
+      </tr>" .
+      /*<tr>
+         <td>" . __('Coupons', 'wpecomm-mercadopago-module' ) . "</td>
+         <td>" .
+            coupom_ticket() . "
+            <p class='description'>" .
+               __( "If there is a Mercado Pago campaign, allow your store to give discounts to customers.", 'wpecomm-mercadopago-module' ) . "
+            </p>
+         </td>
+      </tr>*/
+      "<tr>
          <td>" . __('Binary Mode', 'wpecomm-mercadopago-module') . "
          </td>
          <td>" .
@@ -975,7 +944,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
             plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) . '
             " width="156" height="40" />
          <img alt="Mercado Pago" title="Mercado Pago" class="mp-creditcard-banner" src="' .
-            getImagePath($banners_mercadopago_standard[get_option('mercadopago_custom_siteid')]) . '
+            getImagePath_custom($banners_mercadopago_standard[get_option('mercadopago_custom_siteid')]) . '
             " width="312" height="40" />
       </div>';
    // payment method
@@ -997,7 +966,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
                <div class="mp-box-inputs mp-col-45">
                   <label for="customer-and-card-securityCode">' . $form_labels['form']['security_code'] . ' <em>*</em></label>
                   <input type="text" id="customer-and-card-securityCode" data-checkout="securityCode" autocomplete="off"
-                     maxlength="4" style="padding: 8px; background: url( ' . getImagePath('cvv.png') .
+                     maxlength="4" style="padding: 8px; background: url( ' . getImagePath_custom('cvv.png') .
                      ' ) 98% 50% no-repeat;"/>
                   <span class="mp-error" id="mp-error-224" data-main="#customer-and-card-securityCode"> ' .
                      $form_labels['error']['224'] . ' </span>
@@ -1059,7 +1028,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
                <div class="mp-box-inputs mp-col-45">
                   <label for="securityCode">' . $form_labels['form']['security_code'] . ' <em>*</em></label>
                   <input type="text" id="securityCode" data-checkout="securityCode" autocomplete="off"' .
-                     'maxlength="4" style="padding: 8px; background: url( ' . getImagePath('cvv.png') .
+                     'maxlength="4" style="padding: 8px; background: url( ' . getImagePath_custom('cvv.png') .
                      ' ) 98% 50% no-repeat;" />
                   <span class="mp-error" id="mp-error-224" data-main="#securityCode"> ' .
                      $form_labels['error']['224'] . ' </span>
@@ -1132,7 +1101,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
          var mercadopago_public_key = "' . get_option('mercadopago_custom_publickey') . '";
          MPv1.text.choose = "' . $form_labels["form"]["label_choose"] . '";
          MPv1.text.other_bank = "' . $form_labels["form"]["label_other_bank"] . '";
-         MPv1.paths.loading = "' . getImagePath('loading.gif') . '";
+         MPv1.paths.loading = "' . getImagePath_custom('loading.gif') . '";
          MPv1.setForm = function() {
             if (MPv1.customer_and_card.status) {
                document.querySelector(MPv1.selectors.form).style.display = "none";
