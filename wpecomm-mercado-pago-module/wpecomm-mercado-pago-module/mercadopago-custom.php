@@ -110,25 +110,33 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
                   '<br/></h3>' . $checkout_info['response']['message'] .
                   '<br/><br/><h3><a href="' . add_query_arg('sessionid',
                      $this->cart_data['session_id'], get_option( 'shopping_cart_url' )) .
-                     '">Return and Try Again</a></h3><br/><br/>';
+                     '">' . $form_labels['form']['return_and_try'] . '</a></h3><br/><br/>';
                get_footer();
             } else {
                $response = $checkout_info[ 'response' ];
                if ( array_key_exists( 'status', $response ) ) {
                   switch ( $response[ 'status' ] ) {
                      case 'approved':
-                        do_action('wpsc_payment_successful');
+                        update_option('mercadopago_custom_order_result', $form_labels['form']['payment_approved']);
                         break;
                      case 'in_process':
-                        do_action('wpsc_payment_incomplete');
+                        update_option('mercadopago_custom_order_result', $form_labels['form']['payment_in_process']);
                         break;
                      case 'rejected':
-                        do_action('wpsc_payment_failed');
+                        update_option('mercadopago_custom_order_result', $form_labels['form']['payment_rejected']);
                         break;
                      case 'pending':
+                        update_option('mercadopago_custom_order_result', $form_labels['form']['payment_pending']);
+                        break;
                      case 'cancelled':
+                        update_option('mercadopago_custom_order_result', $form_labels['form']['payment_cancelled']);
+                        break;
                      case 'in_mediation':
+                        update_option('mercadopago_custom_order_result', $form_labels['form']['payment_in_mediation']);
+                        break;
                      case 'charged-back':
+                        update_option('mercadopago_custom_order_result', $form_labels['form']['payment_charged_back']);
+                        break;
                   }
                   $transaction_url_with_sessionid = add_query_arg(
                      'sessionid', $this->cart_data['session_id'], get_option( 'transact_url' )
@@ -142,7 +150,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
                $form_labels['error']['server_error_checkout'] .
                '<br/><br/>' . '<a href="' . add_query_arg('sessionid',
                   $this->cart_data['session_id'], get_option( 'shopping_cart_url' )) .
-                  '">Return and Try Again</a></h3><br/><br/>';
+                  '">' . $form_labels['form']['return_and_try'] . '</a></h3><br/><br/>';
             get_footer();
          }
       } else {
@@ -151,7 +159,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
             $form_labels['error']['missing_data_checkout'] .
             '<br/><br/>' . '<a href="' . add_query_arg('sessionid',
                $this->cart_data['session_id'], get_option( 'shopping_cart_url' )) .
-               '">Return and Try Again</a></h3><br/><br/>';
+               '">' . $form_labels['form']['return_and_try'] . '</a></h3><br/><br/>';
          get_footer();
       }
 
@@ -363,7 +371,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
     * @access private
     */
    function parse_gateway_notification() {
-      /*$paypal_url = get_option( 'paypal_multiple_url' );
+      /*$paypal_url = get_option( 'mercadopago_multiple_url' );
 
       $received_values = array( );
       $received_values['cmd'] = '_notify-validate';
@@ -374,9 +382,16 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
          'body'       => $received_values,
          'httpversion' => '1.1',
          'user-agent' => ('WP eCommerce/' . WPSC_PRESENTABLE_VERSION)
-      );
+      );*/
 
-      $response = wp_safe_remote_post( $paypal_url, $options );
+      // process IPN messages
+      $data = $this->check_ipn_request_is_valid( $_GET );
+      if ( $data ) {
+         header( 'HTTP/1.1 200 OK' );
+         //do_action( 'valid_mercadopagocustom_ipn_request', $data );
+      }
+
+      /*$response = wp_safe_remote_post( $paypal_url, $options );
 
       if ( strpos( $response['body'], 'VERIFIED' ) !== false ) {
          $this->paypal_ipn_values = $received_values;
@@ -386,7 +401,65 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
       }*/
    }
 
+   function check_ipn_request_is_valid( $data ) {
+      if ( !isset( $data[ 'data_id' ] ) || !isset( $data[ 'type' ] ) ) {
+         // at least, check if its a v0 ipn
+         if ( !isset( $data[ 'id' ] ) || !isset( $data[ 'topic' ] ) ) {
+            wp_die( __( 'Mercado Pago Request Failure', 'woocommerce-mercadopago-module' ) );
+         } else {
+            header( 'HTTP/1.1 200 OK' );
+         }
+         // No ID? No process!
+         return false;
+      }
+
+      $mp = new MP(
+         get_option('mercadopago_custom_accesstoken')
+      );
+      if ( 'yes' == $this->sandbox )
+         $mp->sandbox_mode( true );
+      else
+         $mp->sandbox_mode( false );
+      try {
+         $access_token = array( "access_token" => $this->mp->get_access_token() );
+         if ( $data[ "type" ] == 'payment' ) {
+            $payment_info = $this->mp->get( "/v1/payments/" . $data[ "data_id" ], $access_token, false );
+            if ( !is_wp_error( $payment_info ) &&
+               ( $payment_info[ "status" ] == 200 || $payment_info[ "status" ] == 201 ) ) {
+               return $payment_info[ 'response' ];
+            } else {
+               return false;
+            }
+         }
+      } catch ( MercadoPagoException $e ) {
+         return false;
+      }
+      return true;
+   }
+
 }
+
+function _wpsc_filter_mercadopago_merchant_customer_notification_raw_message( $message, $notification ) {
+   $purchase_log = $notification->get_purchase_log();
+
+   if ( $purchase_log->get( 'gateway' ) == 'WPSC_Merchant_MercadoPago_Custom' )
+      $message = get_option( 'mercadopago_custom_order_result', 'Your order is <strong>pending</strong>.' ) . "\r\n" . $message;
+
+   return $message;
+}
+
+add_filter(
+   'wpsc_purchase_log_customer_notification_raw_message',
+   '_wpsc_filter_mercadopago_merchant_customer_notification_raw_message',
+   10,
+   2
+);
+add_filter(
+   'wpsc_purchase_log_customer_html_notification_raw_message',
+   '_wpsc_filter_mercadopago_merchant_customer_notification_raw_message',
+   10,
+   2
+);
 
 /*===============================================================================
    AUXILIARY FUNCTIONS
@@ -518,6 +591,14 @@ function form_mercadopago_custom() {
    // labels
    $form_labels = array(
       "form" => array(
+         "payment_approved" => __( "Payment <strong>approved</strong>.", "wpecomm-mercadopago-module" ),
+         "payment_in_process" => __( "Your payment under <strong>review</strong>.", "wpecomm-mercadopago-module" ),
+         "payment_rejected" => __( "Your payment was <strong>refused</strong>.", "wpecomm-mercadopago-module" ),
+         "payment_pending" => __( "Your payment is <strong>pending</strong>.", "wpecomm-mercadopago-module" ),
+         "payment_cancelled" => __( "Your payment has been <strong>canceled</strong>.", "wpecomm-mercadopago-module" ),
+         "payment_in_mediation" => __( "Your payment is in <strong>mediation</strong>.", "wpecomm-mercadopago-module" ),
+         "payment_charged_back" => __( "Your payment has been <strong>refunded</strong>.", "wpecomm-mercadopago-module" ),
+         "return_and_try" => __( "Return and Try Again", "wpecomm-mercadopago-module" ),
          "tax_fees" => __( "Tax fees applicable in store", "wpecomm-mercadopago-module" ),
          "shipment" => __( "Shipping service used by store", "wpecomm-mercadopago-module" ),
          "payment_converted" => __( "Payment with converted currency", "wpecomm-mercadopago-module" ),
