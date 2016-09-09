@@ -566,6 +566,9 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_ga
 
    // Get the order amount
    $amount = wpsc_cart_total(false);
+   $account_currency = getCurrencyId_ticket( get_option('mercadopago_ticket_siteid') );
+   $currency_ratio = get_option('mercadopago_ticket_currencyratio');
+   $wpecommerce_currency = WPSC_Countries::get_currency_code(absint(get_option('currency_type')));
 
    // Build payment banner url
    $banners_mercadopago_standard = array(
@@ -610,13 +613,53 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_ga
       '</div>';
    // payment method
    $mercadopago_form =
+      '<form action="' . '" method="post"><fieldset style="background:white;">
+         <div style="padding:0px 36px 0px 36px;">
+
+            <p>' .
+               ( count( $payment_methods ) > 1 ? $form_labels[ 'form' ][ 'issuer_selection' ] :
+                  $form_labels[ 'form' ][ 'payment_instructions' ] ) .
+               '<br />' .
+               $form_labels[ 'form' ][ 'ticket_note' ] .
+               ( $currency_ratio > 0 ? " (" . $form_labels['form']['payment_converted'] . " " .
+                  $wpecommerce_currency . " " . $form_labels['form']['to'] . " " . $account_currency . ")" : "") .
+            '</p>' .
+
+            drawTicketOptions() .
+
+            '<div class="mp-box-inputs mp-line">
+               <div class="mp-box-inputs mp-col-25">
+                  <div id="mp-box-loading">
+                  </div>
+               </div>
+            </div>
+
+            <div class="mp-box-inputs mp-col-100" id="mercadopago-utilities">
+               <input type="hidden" id="public_key" value="' . $public_key . '" name="mercadopago_ticket[amount]"/>
+               <input type="hidden" id="site_id"  value="' . $site_id . '" name="mercadopago_ticket[site_id]"/>
+               <input type="hidden" id="amountTicket" value="<?php echo $amount; ?>" name="mercadopago_ticket[amount]"/>
+               <input type="hidden" id="campaign_idTicket" name="mercadopago_ticket[campaign_id]"/>
+               <input type="hidden" id="campaignTicket" name="mercadopago_ticket[campaign]"/>
+               <input type="hidden" id="discountTicket" name="mercadopago_ticket[discount]"/>
+            </div>
+
+         </div>
+      </fieldset></form>';
+
+   /* TODO: translate:
+      issuer_selection
+      payment_instructions
+      ticket_note
+      payment_converted
+      to
+   */
 
 	$output = '
       <tr>
          <td>' .
             //$page_header .
             '<div style="width: 600px;">' . $payment_header . '</div>' .
-            //'<div style="width: 600px;">' . $mercadopago_form  . '</div>'  .
+            '<div style="width: 600px;">' . $mercadopago_form  . '</div>'  .
             //$page_js .
          '</td>
       </tr>';
