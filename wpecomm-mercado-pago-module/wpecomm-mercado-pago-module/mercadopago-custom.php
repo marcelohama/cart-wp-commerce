@@ -47,9 +47,75 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
       // labels
       $form_labels = json_decode(stripslashes(
          preg_replace('/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
-            get_option('mercadopago_custom_checkoutmessage1')
+            get_option('mercadopago_custom_checkoutmessage1', '')
          ))
       ), true);
+      if ( $form_labels == '' ) {
+         $form_labels = array(
+            "form" => array(
+               "payment_approved" => __( "Payment <strong>approved</strong>.", "wpecomm-mercadopago-module" ),
+               "payment_in_process" => __( "Your payment under <strong>review</strong>.", "wpecomm-mercadopago-module" ),
+               "payment_rejected" => __( "Your payment was <strong>refused</strong>.", "wpecomm-mercadopago-module" ),
+               "payment_pending" => __( "Your payment is <strong>pending</strong>.", "wpecomm-mercadopago-module" ),
+               "payment_cancelled" => __( "Your payment has been <strong>canceled</strong>.", "wpecomm-mercadopago-module" ),
+               "payment_in_mediation" => __( "Your payment is in <strong>mediation</strong>.", "wpecomm-mercadopago-module" ),
+               "payment_charged_back" => __( "Your payment has been <strong>refunded</strong>.", "wpecomm-mercadopago-module" ),
+               "return_and_try" => __( "Return and Try Again", "wpecomm-mercadopago-module" ),
+               "tax_fees" => __( "Tax fees applicable in store", "wpecomm-mercadopago-module" ),
+               "shipment" => __( "Shipping service used by store", "wpecomm-mercadopago-module" ),
+               "payment_converted" => __( "Payment with converted currency", "wpecomm-mercadopago-module" ),
+               "to" => __( "to", "wpecomm-mercadopago-module" ),
+               "label_other_bank" => __( "Other Bank", "wpecomm-mercadopago-module" ),
+               "label_choose" => __( "Choose", "wpecomm-mercadopago-module" ),
+               "your_card" => __( "Your Card", "wpecomm-mercadopago-module" ),
+               "other_cards" => __( "Other Cards", "wpecomm-mercadopago-module" ),
+               "other_card" => __( "Other Card", "wpecomm-mercadopago-module" ),
+               "ended_in" => __( "ended in", "wpecomm-mercadopago-module" ),
+               "card_holder_placeholder" => __( " as it appears in your card ...", "wpecomm-mercadopago-module" ),
+               "payment_method" => __( "Payment Method", "wpecomm-mercadopago-module" ),
+               "credit_card_number" => __( "Credit card number", "wpecomm-mercadopago-module" ),
+               "expiration_month" => __( "Expiration month", "wpecomm-mercadopago-module" ),
+               "expiration_year" => __( "Expiration year", "wpecomm-mercadopago-module" ),
+               "year" => __( "Year", "wpecomm-mercadopago-module" ),
+               "month" => __( "Month", "wpecomm-mercadopago-module" ),
+               "card_holder_name" => __( "Card holder name", "wpecomm-mercadopago-module" ),
+               "security_code" => __( "Security code", "wpecomm-mercadopago-module" ),
+               "document_type" => __( "Document Type", "wpecomm-mercadopago-module" ),
+               "document_number" => __( "Document number", "wpecomm-mercadopago-module" ),
+               "issuer" => __( "Issuer", "wpecomm-mercadopago-module" ),
+               "installments" => __( "Installments", "wpecomm-mercadopago-module" )
+            ),
+            "error" => array(
+               "missing_data_checkout" => __( "Your payment failed to be processed.<br/>Are you sure you have set all information?", "wpecomm-mercadopago-module" ),
+               "server_error_checkout" => __( "Your payment could not be completed. Please, try again.", "wpecomm-mercadopago-module" ),
+               //card number
+               "205" => __( "Parameter cardNumber can not be null/empty", "wpecomm-mercadopago-module" ),
+               "E301" => __( "Invalid Card Number", "wpecomm-mercadopago-module" ),
+               //expiration date
+               "208" => __( "Invalid Expiration Date", "wpecomm-mercadopago-module" ),
+               "209" => __( "Invalid Expiration Date", "wpecomm-mercadopago-module" ),
+               "325" => __( "Invalid Expiration Date", "wpecomm-mercadopago-module" ),
+               "326" => __( "Invalid Expiration Date", "wpecomm-mercadopago-module" ),
+               //card holder name
+               "221" => __( "Parameter cardholderName can not be null/empty", "wpecomm-mercadopago-module" ),
+               "316" => __( "Invalid Card Holder Name", "wpecomm-mercadopago-module" ),
+               //security code
+               "224" => __( "Parameter securityCode can not be null/empty", "wpecomm-mercadopago-module" ),
+               "E302" => __( "Invalid Security Code", "wpecomm-mercadopago-module" ),
+               //doc type
+               "212" => __( "Parameter docType can not be null/empty", "wpecomm-mercadopago-module" ),
+               "322" => __( "Invalid Document Type", "wpecomm-mercadopago-module" ),
+               //doc number
+               "214" => __( "Parameter docNumber can not be null/empty", "wpecomm-mercadopago-module" ),
+               "324" => __( "Invalid Document Number", "wpecomm-mercadopago-module" ),
+               //doc sub type
+               "213" => __( "The parameter cardholder.document.subtype can not be null or empty", "wpecomm-mercadopago-module" ),
+               "323" => __( "Invalid Document Sub Type", "wpecomm-mercadopago-module" ),
+               //issuer
+               "220" => __( "Parameter cardIssuerId can not be null/empty", "wpecomm-mercadopago-module" )
+            )
+         );
+      }
 
       // Mexico country case
       if ( $_REQUEST[ 'mercadopago_custom' ][ 'paymentMethodId' ] == "" ||
@@ -91,7 +157,6 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
             $mp = new MP(
                get_option('mercadopago_custom_accesstoken')
             );
-            $isTestUser = get_option('mercadopago_custom_istestuser');
             if ( 'active' == get_option('mercadopago_custom_sandbox') ) {
                $mp->sandbox_mode( true );
             } else {
@@ -380,7 +445,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 
 }
 
-function _wpsc_filter_mercadopago_merchant_customer_notification_raw_message( $message, $notification ) {
+function _wpsc_filter_mercadopago_custom_merchant_customer_notification_raw_message( $message, $notification ) {
    $purchase_log = $notification->get_purchase_log();
 
    if ( $purchase_log->get( 'gateway' ) == 'WPSC_Merchant_MercadoPago_Custom' )
@@ -391,13 +456,13 @@ function _wpsc_filter_mercadopago_merchant_customer_notification_raw_message( $m
 
 add_filter(
    'wpsc_purchase_log_customer_notification_raw_message',
-   '_wpsc_filter_mercadopago_merchant_customer_notification_raw_message',
+   '_wpsc_filter_mercadopago_custom_merchant_customer_notification_raw_message',
    10,
    2
 );
 add_filter(
    'wpsc_purchase_log_customer_html_notification_raw_message',
-   '_wpsc_filter_mercadopago_merchant_customer_notification_raw_message',
+   '_wpsc_filter_mercadopago_custom_merchant_customer_notification_raw_message',
    10,
    2
 );
@@ -932,9 +997,75 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
    // labels
    $form_labels = json_decode(stripslashes(
       preg_replace('/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
-         get_option('mercadopago_custom_checkoutmessage1')
+         get_option('mercadopago_custom_checkoutmessage1', '')
       ))
    ), true);
+   if ( $form_labels == '' ) {
+      $form_labels = array(
+         "form" => array(
+            "payment_approved" => __( "Payment <strong>approved</strong>.", "wpecomm-mercadopago-module" ),
+            "payment_in_process" => __( "Your payment under <strong>review</strong>.", "wpecomm-mercadopago-module" ),
+            "payment_rejected" => __( "Your payment was <strong>refused</strong>.", "wpecomm-mercadopago-module" ),
+            "payment_pending" => __( "Your payment is <strong>pending</strong>.", "wpecomm-mercadopago-module" ),
+            "payment_cancelled" => __( "Your payment has been <strong>canceled</strong>.", "wpecomm-mercadopago-module" ),
+            "payment_in_mediation" => __( "Your payment is in <strong>mediation</strong>.", "wpecomm-mercadopago-module" ),
+            "payment_charged_back" => __( "Your payment has been <strong>refunded</strong>.", "wpecomm-mercadopago-module" ),
+            "return_and_try" => __( "Return and Try Again", "wpecomm-mercadopago-module" ),
+            "tax_fees" => __( "Tax fees applicable in store", "wpecomm-mercadopago-module" ),
+            "shipment" => __( "Shipping service used by store", "wpecomm-mercadopago-module" ),
+            "payment_converted" => __( "Payment with converted currency", "wpecomm-mercadopago-module" ),
+            "to" => __( "to", "wpecomm-mercadopago-module" ),
+            "label_other_bank" => __( "Other Bank", "wpecomm-mercadopago-module" ),
+            "label_choose" => __( "Choose", "wpecomm-mercadopago-module" ),
+            "your_card" => __( "Your Card", "wpecomm-mercadopago-module" ),
+            "other_cards" => __( "Other Cards", "wpecomm-mercadopago-module" ),
+            "other_card" => __( "Other Card", "wpecomm-mercadopago-module" ),
+            "ended_in" => __( "ended in", "wpecomm-mercadopago-module" ),
+            "card_holder_placeholder" => __( " as it appears in your card ...", "wpecomm-mercadopago-module" ),
+            "payment_method" => __( "Payment Method", "wpecomm-mercadopago-module" ),
+            "credit_card_number" => __( "Credit card number", "wpecomm-mercadopago-module" ),
+            "expiration_month" => __( "Expiration month", "wpecomm-mercadopago-module" ),
+            "expiration_year" => __( "Expiration year", "wpecomm-mercadopago-module" ),
+            "year" => __( "Year", "wpecomm-mercadopago-module" ),
+            "month" => __( "Month", "wpecomm-mercadopago-module" ),
+            "card_holder_name" => __( "Card holder name", "wpecomm-mercadopago-module" ),
+            "security_code" => __( "Security code", "wpecomm-mercadopago-module" ),
+            "document_type" => __( "Document Type", "wpecomm-mercadopago-module" ),
+            "document_number" => __( "Document number", "wpecomm-mercadopago-module" ),
+            "issuer" => __( "Issuer", "wpecomm-mercadopago-module" ),
+            "installments" => __( "Installments", "wpecomm-mercadopago-module" )
+         ),
+         "error" => array(
+            "missing_data_checkout" => __( "Your payment failed to be processed.<br/>Are you sure you have set all information?", "wpecomm-mercadopago-module" ),
+            "server_error_checkout" => __( "Your payment could not be completed. Please, try again.", "wpecomm-mercadopago-module" ),
+            //card number
+            "205" => __( "Parameter cardNumber can not be null/empty", "wpecomm-mercadopago-module" ),
+            "E301" => __( "Invalid Card Number", "wpecomm-mercadopago-module" ),
+            //expiration date
+            "208" => __( "Invalid Expiration Date", "wpecomm-mercadopago-module" ),
+            "209" => __( "Invalid Expiration Date", "wpecomm-mercadopago-module" ),
+            "325" => __( "Invalid Expiration Date", "wpecomm-mercadopago-module" ),
+            "326" => __( "Invalid Expiration Date", "wpecomm-mercadopago-module" ),
+            //card holder name
+            "221" => __( "Parameter cardholderName can not be null/empty", "wpecomm-mercadopago-module" ),
+            "316" => __( "Invalid Card Holder Name", "wpecomm-mercadopago-module" ),
+            //security code
+            "224" => __( "Parameter securityCode can not be null/empty", "wpecomm-mercadopago-module" ),
+            "E302" => __( "Invalid Security Code", "wpecomm-mercadopago-module" ),
+            //doc type
+            "212" => __( "Parameter docType can not be null/empty", "wpecomm-mercadopago-module" ),
+            "322" => __( "Invalid Document Type", "wpecomm-mercadopago-module" ),
+            //doc number
+            "214" => __( "Parameter docNumber can not be null/empty", "wpecomm-mercadopago-module" ),
+            "324" => __( "Invalid Document Number", "wpecomm-mercadopago-module" ),
+            //doc sub type
+            "213" => __( "The parameter cardholder.document.subtype can not be null or empty", "wpecomm-mercadopago-module" ),
+            "323" => __( "Invalid Document Sub Type", "wpecomm-mercadopago-module" ),
+            //issuer
+            "220" => __( "Parameter cardIssuerId can not be null/empty", "wpecomm-mercadopago-module" )
+         )
+      );
+   }
 
    // header
    $payment_header =
@@ -949,7 +1080,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
       </div>';
    // payment method
    $mercadopago_form =
-      '<form action="' . '" method="post"><fieldset style="background:white;">
+      '<fieldset style="background:white;">
          <div id="mercadopago-form-customer-and-card" style="padding:0px 36px 0px 36px;">
             <div class="mp-box-inputs mp-line">
                <label for="paymentMethodIdSelector">' . $form_labels['form']['payment_method'] . ' <em>*</em></label>
@@ -1090,7 +1221,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
             <input type="hidden" id="customerId" value="' . $customerId . '" name="mercadopago_custom[customerId]"/>
          </div>
 
-      </fieldset></form>';
+      </fieldset>';
 
    $page_js = '
       <script src="https://secure.mlstatic.com/sdk/javascript/v1/mercadopago.js"></script>

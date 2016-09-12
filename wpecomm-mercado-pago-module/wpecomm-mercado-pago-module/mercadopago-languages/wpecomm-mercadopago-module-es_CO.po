@@ -406,3 +406,12 @@ msgstr "Su pago esta en <strong>mediación</strong>."
 
 msgid "Your payment has been <strong>refunded</strong>."
 msgstr "Su pago se ha <strong>extornado</strong>."
+
+msgid "Please, select the ticket issuer of your preference."
+msgstr "Por favor, seleccione el emisor de su elección."
+
+msgid "Click [Place order] button. The ticket will be generated and you will be redirected to print it."
+msgstr "Haga clic en el botón [PLACE ORDER]. El ticket será generado y usted será redirigido a imprimirlo."
+
+msgid "Important - The order will be confirmed only after the payment approval."
+msgstr "Importante - La solicitud sólo será confirmada después de la aprobación del pago."
