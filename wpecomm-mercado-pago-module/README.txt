@@ -4,7 +4,7 @@ Donate link: https://www.mercadopago.com.br/developers/
 Tags: ecommerce, mercadopago, wpecommerce
 Requires at least: WP-eCommerce 3.11.x
 Tested up to: WP-eCommerce 3.11.x
-Stable tag: 4.1.0
+Stable tag: 4.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,7 +39,7 @@ You have two ways to install this module: from your WordPress Store, or by downl
 3. You should find the module read to be installed. Click install.
 
 = Manual Download =
-1. Get the module sources from a repository (<a href="https://github.com/mercadopago/cart-wp-commerce/archive/master.zip">Github</a> or <a href="https://downloads.wordpress.org/plugin/wpecomm-mercado-pago-module.4.1.0.zip">WordPress Plugin Directory</a>);
+1. Get the module sources from a repository (<a href="https://github.com/mercadopago/cart-wp-commerce/archive/master.zip">Github</a> or <a href="https://downloads.wordpress.org/plugin/wpecomm-mercado-pago-module.4.2.0.zip">WordPress Plugin Directory</a>);
 2. Unzip the folder and find "wpecomm-mercado-pago-module" directory;
 3. Copy "wpecomm-mercado-pago-module" directory to **[WordPressRootDirectory]/wp-content/plugins/** directory.
 
@@ -65,21 +65,19 @@ To confirm that your module is really installed, you can click in **Plugins** it
 		* Venezuela: https://www.mercadopago.com/mlv/account/credentials?type=custom
 2. For the solutions **Mercado Pago - Basic Checkout**, **Mercado Pago - Custom Checkout**, and **Mercado Pago - Ticket**, you can:
 	* Enable/Disable you plugin (for all solutions);
-	* Set the title of the payment option that will be shown to your customers (for all solutions);
 	* Set up your credentials (Client_id/Client_secret for Basic, Public Key/Access Token for Custom and Ticket);
-	* Set the description of the payment option that will be shown to your customers (for all solutions);
+	* Set the description of the payment option that will be shown to your customers (only for Basic);
+	* Set the description that will be shown in your customer's invoice (only for Custom);
+	* Set binary mode that when charging a credit card, only [approved] or [reject] status will be taken (only for Custom);
 	* Set the category of your store (for all solutions);
-	* Set the description that will be shown in your customer's invoice (for Custom and Ticket);
-	* Set URL for approved/pending callbacks;
-	* Enable coupon of campaigns for discounts (for Custom and Ticket);
-	* Set binary mode that when charging a credit card, only [approved] or [reject] status will be taken (only for Custom);	
 	* Set a prefix to identify your store, when you have multiple stores for only one Mercado Pago account (for all solutions);
 	* Define how your customers will interact with Mercado Pago to pay their orders (only for Basic);
 	* Configure the after-pay return behavior (only for Basic);
+	* Set your IPN URL, where you will get notified about payment updates (for all solutions);
 	* Configure the maximum installments allowed for your customers (only for Basic);
 	* Configure the payment methods that you want to not work with Mercado Pago (only for Basic);
 	* Enable currency conversion (for all solutions);
-	* Enable/disable sandbox mode, where you can test your payments in Mercado Pago sandbox environment (for all solutions);
+	* Enable/disable sandbox mode, where you can test your payments in Mercado Pago sandbox environment (for Basic and Custom);
 	* Enables/disable system logs (for all solutions).
 
 = In this video, we show how you can install and configure from your WordPress store =
@@ -96,12 +94,23 @@ Please, check our FAQ at: https://www.mercadopago.com.br/ajuda/
 
 == Screenshots ==
 
-1. `Basic Checkout`
+1. `Custom Checkout`
 
-2. `Configuration of Basic Checkout`
+2. `One Click Payment`
+
+3. `Tickets`
+
+4. `Configuration of Basic Checkout`
 
 == Changelog ==
 
+= v4.2.0 (14/09/2016) =
+* Features
+	- Custom Checkout for LatAm. Offer a checkout fully customized to your brand experience with our simple-to-use payments API. Want to see how it works on-the-fly? Please check this video: <a href="TODO">Custom Checkout + Customer Cards</a>;
+	- Ticket for LatAm. Now, customer can pay orders with bank tickets. Want to see how it works on-the-fly? Please check this video: <a href="TODO">Tickets</a>.
+* Improvements
+	- Several little improvements for Basic Checkout.
+	
 = v4.1.0 (22/08/2016) =
 * Improvements
 	- Wrapped the module as an WordPress Plugin Directory.

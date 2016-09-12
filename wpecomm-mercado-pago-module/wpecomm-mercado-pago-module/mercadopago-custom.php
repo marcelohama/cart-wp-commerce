@@ -385,7 +385,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 
       // Set sponsor ID
       if ( get_option('mercadopago_custom_istestuser') == "no" ) {
-         switch (get_option('mercadopago_custom_siteid')) {
+         switch (get_option('mercadopago_custom_siteid', 'MLA')) {
             case 'MLA':
                $sponsor_id = 219693774;
                break;
@@ -1075,7 +1075,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
             plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) . '
             " width="156" height="40" />
          <img alt="Mercado Pago" title="Mercado Pago" class="mp-creditcard-banner" src="' .
-            getImagePath_custom($banners_mercadopago_standard[get_option('mercadopago_custom_siteid')]) . '
+            getImagePath_custom($banners_mercadopago_standard[get_option('mercadopago_custom_siteid', 'MLA')]) . '
             " width="312" height="40" />
       </div>';
    // payment method
@@ -1228,7 +1228,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
       <script src="' . plugins_url( 'wpsc-merchants/mercadopago-lib/MPv1.js?no_cache=' .
          time(), plugin_dir_path( __FILE__ ) ) . '"></script>
       <script type="text/javascript">
-         var mercadopago_site_id = "' . get_option('mercadopago_custom_siteid') . '";
+         var mercadopago_site_id = "' . get_option('mercadopago_custom_siteid', 'MLA') . '";
          var mercadopago_public_key = "' . get_option('mercadopago_custom_publickey') . '";
          MPv1.text.choose = "' . $form_labels["form"]["label_choose"] . '";
          MPv1.text.other_bank = "' . $form_labels["form"]["label_other_bank"] . '";
