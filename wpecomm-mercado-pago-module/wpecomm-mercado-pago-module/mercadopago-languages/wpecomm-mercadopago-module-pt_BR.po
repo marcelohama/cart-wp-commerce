@@ -415,3 +415,9 @@ msgstr "Clique no botão [COMPRA]. O boleto será gerado e você será redirecio
 
 msgid "Important - The order will be confirmed only after the payment approval."
 msgstr "Importante - O pedido só será confirmado após a aprovação do pagamento."
+
+msgid "Please, pay the ticket to get your order approved"
+msgstr "Por favor, pague o boleto para ter seu pedido aprovado."
+
+msgid "Print the Ticket"
+msgstr "Imprimir o boleto"

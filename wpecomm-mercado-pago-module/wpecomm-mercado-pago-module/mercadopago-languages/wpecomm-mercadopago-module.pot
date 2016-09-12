@@ -414,3 +414,9 @@ msgstr ""
 
 msgid "Important - The order will be confirmed only after the payment approval."
 msgstr ""
+
+msgid "Please, pay the ticket to get your order approved"
+msgstr ""
+
+msgid "Print the Ticket"
+msgstr ""

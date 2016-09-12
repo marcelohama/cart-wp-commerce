@@ -56,6 +56,8 @@ class WPSC_Merchant_MercadoPago_Ticket extends wpsc_merchant {
                "issuer_selection" => __( 'Please, select the ticket issuer of your preference.', 'wpecomm-mercadopago-module' ),
                "payment_instructions" => __( 'Click [Place order] button. The ticket will be generated and you will be redirected to print it.', 'wpecomm-mercadopago-module' ),
                "ticket_note" => __( 'Important - The order will be confirmed only after the payment approval.', 'wpecomm-mercadopago-module' ),
+               "ticket_resume" => __( 'Please, pay the ticket to get your order approved.', 'wpecomm-mercadopago-module'),
+               "print_ticket" => __( 'Print the Ticket', 'wpecomm-mercadopago-module' ),
                "payment_approved" => __( "Payment <strong>approved</strong>.", "wpecomm-mercadopago-module" ),
                "payment_in_process" => __( "Your payment under <strong>review</strong>.", "wpecomm-mercadopago-module" ),
                "payment_rejected" => __( "Your payment was <strong>refused</strong>.", "wpecomm-mercadopago-module" ),
@@ -107,28 +109,12 @@ class WPSC_Merchant_MercadoPago_Ticket extends wpsc_merchant {
             } else {
                $response = $ticket_info[ 'response' ];
                if ( array_key_exists( 'status', $response ) ) {
-                  switch ( $response[ 'status' ] ) {
-                     case 'approved':
-                        update_option('mercadopago_ticket_order_result', $form_labels['form']['payment_approved']);
-                        break;
-                     case 'in_process':
-                        update_option('mercadopago_ticket_order_result', $form_labels['form']['payment_in_process']);
-                        break;
-                     case 'rejected':
-                        update_option('mercadopago_ticket_order_result', $form_labels['form']['payment_rejected']);
-                        break;
-                     case 'pending':
-                        update_option('mercadopago_ticket_order_result', $form_labels['form']['payment_pending']);
-                        break;
-                     case 'cancelled':
-                        update_option('mercadopago_ticket_order_result', $form_labels['form']['payment_cancelled']);
-                        break;
-                     case 'in_mediation':
-                        update_option('mercadopago_ticket_order_result', $form_labels['form']['payment_in_mediation']);
-                        break;
-                     case 'charged-back':
-                        update_option('mercadopago_ticket_order_result', $form_labels['form']['payment_charged_back']);
-                        break;
+                  if ( $response[ 'status' ] == "pending" && $response[ 'status_detail' ] == "pending_waiting_payment" ) {
+                     $message = '<p>' . $form_labels['form']['ticket_resume'] . ' ' .
+                        '<a id="submit-payment" target="_blank" href="' .
+                        $response[ 'transaction_details' ][ 'external_resource_url' ] . '" class="button alt">' .
+                        $form_labels['form']['print_ticket'] . '</a></p><br/>';
+                     update_option('mercadopago_ticket_order_result', $message);
                   }
                   $transaction_url_with_sessionid = add_query_arg(
                      'sessionid', $this->cart_data['session_id'], get_option( 'transact_url' )
@@ -538,6 +524,8 @@ function form_mercadopago_ticket() {
          "issuer_selection" => __( 'Please, select the ticket issuer of your preference.', 'wpecomm-mercadopago-module' ),
          "payment_instructions" => __( 'Click [Place order] button. The ticket will be generated and you will be redirected to print it.', 'wpecomm-mercadopago-module' ),
          "ticket_note" => __( 'Important - The order will be confirmed only after the payment approval.', 'wpecomm-mercadopago-module' ),
+         "ticket_resume" => __( 'Please, pay the ticket to get your order approved.', 'wpecomm-mercadopago-module'),
+         "print_ticket" => __( 'Print the Ticket', 'wpecomm-mercadopago-module' ),
          "payment_approved" => __( "Payment <strong>approved</strong>.", "wpecomm-mercadopago-module" ),
          "payment_in_process" => __( "Your payment under <strong>review</strong>.", "wpecomm-mercadopago-module" ),
          "payment_rejected" => __( "Your payment was <strong>refused</strong>.", "wpecomm-mercadopago-module" ),
@@ -769,7 +757,7 @@ function form_mercadopago_ticket() {
  * Saving of Mercado Pago Ticket Checkout Settings
  * @access public
  *
- * @since 4.1.0
+ * @since 4.2.0
  */
 function submit_mercadopago_ticket() {
 	if (isset($_POST['mercadopago_ticket_accesstoken'])) {
@@ -851,6 +839,8 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_ga
             "issuer_selection" => __( 'Please, select the ticket issuer of your preference.', 'wpecomm-mercadopago-module' ),
             "payment_instructions" => __( 'Click [Place order] button. The ticket will be generated and you will be redirected to print it.', 'wpecomm-mercadopago-module' ),
             "ticket_note" => __( 'Important - The order will be confirmed only after the payment approval.', 'wpecomm-mercadopago-module' ),
+            "ticket_resume" => __( 'Please, pay the ticket to get your order approved.', 'wpecomm-mercadopago-module'),
+            "print_ticket" => __( 'Print the Ticket', 'wpecomm-mercadopago-module' ),
             "payment_approved" => __( "Payment <strong>approved</strong>.", "wpecomm-mercadopago-module" ),
             "payment_in_process" => __( "Your payment under <strong>review</strong>.", "wpecomm-mercadopago-module" ),
             "payment_rejected" => __( "Your payment was <strong>refused</strong>.", "wpecomm-mercadopago-module" ),
