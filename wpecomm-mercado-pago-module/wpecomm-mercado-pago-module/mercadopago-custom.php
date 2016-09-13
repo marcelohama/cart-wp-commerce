@@ -443,7 +443,15 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
          $payment_method_id = $checkout_info[ 'payment_method_id' ];
       }
       try {
-         $this->mp->create_card_in_customer( $custId, $token, $payment_method_id, $issuer_id );
+         $mp = new MP(
+            get_option('mercadopago_custom_accesstoken')
+         );
+         if ( 'active' == get_option('mercadopago_custom_sandbox') ) {
+            $mp->sandbox_mode( true );
+         } else {
+            $mp->sandbox_mode( false );
+         }
+         $mp->create_card_in_customer( $custId, $token, $payment_method_id, $issuer_id );
       } catch ( MercadoPagoException $e ) {}
    }
 
