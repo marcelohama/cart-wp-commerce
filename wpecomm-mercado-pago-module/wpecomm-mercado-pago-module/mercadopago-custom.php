@@ -179,6 +179,7 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
                   switch ( $response[ 'status' ] ) {
                      case 'approved':
                         update_option('mercadopago_custom_order_result', $form_labels['form']['payment_approved']);
+                        $this->checkAndSaveCustomerCard($response);
                         break;
                      case 'in_process':
                         update_option('mercadopago_custom_order_result', $form_labels['form']['payment_in_process']);
@@ -384,8 +385,11 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
       }
 
       // Set sponsor ID
+      $site_id = get_option('mercadopago_custom_siteid', 'MLA');
+      if ( empty($site_id) || $site_id == null )
+         $site_id = 'MLA';
       if ( get_option('mercadopago_custom_istestuser') == "no" ) {
-         switch (get_option('mercadopago_custom_siteid', 'MLA')) {
+         switch ($site_id) {
             case 'MLA':
                $sponsor_id = 219693774;
                break;
@@ -415,6 +419,32 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
       }
 
       return $payment_preference;
+   }
+
+   public function checkAndSaveCustomerCard( $checkout_info ) {
+      $custId = null;
+      $token  = null;
+      $issuer_id = null;
+      $payment_method_id = null;
+      if ( isset( $checkout_info[ 'payer' ][ 'id' ] ) && !empty( $checkout_info[ 'payer' ][ 'id' ] ) ) {
+         $custId = $checkout_info[ 'payer' ][ 'id' ];
+      } else {
+         return;
+      }
+      if ( isset( $checkout_info[ 'metadata' ][ 'token' ] ) && !empty( $checkout_info[ 'metadata' ][ 'token' ] ) ) {
+         $token = $checkout_info[ 'metadata' ][ 'token' ];
+      } else {
+         return;
+      }
+      if ( isset( $checkout_info[ 'issuer_id' ] ) && !empty( $checkout_info[ 'issuer_id' ] ) ) {
+         $issuer_id = (integer)( $checkout_info[ 'issuer_id' ] );
+      }
+      if ( isset( $checkout_info[ 'payment_method_id' ] ) && !empty( $checkout_info[ 'payment_method_id' ] ) ) {
+         $payment_method_id = $checkout_info[ 'payment_method_id' ];
+      }
+      try {
+         $this->mp->create_card_in_customer( $custId, $token, $payment_method_id, $issuer_id );
+      } catch ( MercadoPagoException $e ) {}
    }
 
    // Multi-language plugin
@@ -994,6 +1024,9 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
       "MLM" => 'MLM/standard.jpg'
    );
 
+   $site_id = get_option('mercadopago_custom_siteid', 'MLA');
+   if ( empty($site_id) || $site_id == null )
+      $site_id = 'MLA';
    // labels
    $form_labels = json_decode(stripslashes(
       preg_replace('/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
@@ -1075,7 +1108,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
             plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) . '
             " width="156" height="40" />
          <img alt="Mercado Pago" title="Mercado Pago" class="mp-creditcard-banner" src="' .
-            getImagePath_custom($banners_mercadopago_standard[get_option('mercadopago_custom_siteid', 'MLA')]) . '
+            getImagePath_custom($banners_mercadopago_standard[$site_id]) . '
             " width="312" height="40" />
       </div>';
    // payment method
@@ -1228,7 +1261,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
       <script src="' . plugins_url( 'wpsc-merchants/mercadopago-lib/MPv1.js?no_cache=' .
          time(), plugin_dir_path( __FILE__ ) ) . '"></script>
       <script type="text/javascript">
-         var mercadopago_site_id = "' . get_option('mercadopago_custom_siteid', 'MLA') . '";
+         var mercadopago_site_id = "' . $site_id . '";
          var mercadopago_public_key = "' . get_option('mercadopago_custom_publickey') . '";
          MPv1.text.choose = "' . $form_labels["form"]["label_choose"] . '";
          MPv1.text.other_bank = "' . $form_labels["form"]["label_other_bank"] . '";

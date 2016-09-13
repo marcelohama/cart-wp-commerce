@@ -168,6 +168,11 @@ class WPSC_Merchant_MercadoPago_Ticket extends wpsc_merchant {
          $arr_info[$value['unique_name']] = $value['value'];
       }
 
+      // site id
+      $site_id = get_option('mercadopago_ticket_siteid', 'MLA');
+      if ( empty($site_id) || $site_id == null )
+         $site_id = 'MLA';
+
       // Here we build the array that contains ordered itens, from customer cart
       $items = array();
       $purchase_description = "";
@@ -300,7 +305,7 @@ class WPSC_Merchant_MercadoPago_Ticket extends wpsc_merchant {
 
       // Set sponsor ID
       if ( get_option('mercadopago_ticket_istestuser') == "no" ) {
-         switch (get_option('mercadopago_ticket_siteid')) {
+         switch ($site_id) {
             case 'MLA':
                $sponsor_id = 219693774;
                break;
@@ -810,9 +815,12 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_ga
    $isTestUser = get_option('mercadopago_ticket_istestuser');
    $mp->sandbox_mode( false );
 
-   // Get the order amount
+   // Get needed variables
+   $site_id = get_option('mercadopago_custom_siteid', 'MLA');
+   if ( empty($site_id) || $site_id == null )
+      $site_id = 'MLA';
    $amount = wpsc_cart_total(false);
-   $account_currency = getCurrencyId_ticket( get_option('mercadopago_ticket_siteid') );
+   $account_currency = getCurrencyId_ticket( $site_id );
    $currency_ratio = get_option('mercadopago_ticket_currencyratio');
    $wpecommerce_currency = WPSC_Countries::get_currency_code(absint(get_option('currency_type')));
 
@@ -912,7 +920,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_ga
       <script src="' . plugins_url( 'wpsc-merchants/mercadopago-lib/MPv1Ticket.js?no_cache=' .
          time(), plugin_dir_path( __FILE__ ) ) . '"></script>
       <script type="text/javascript">
-         var mercadopago_site_id = "' . get_option('mercadopago_ticket_siteid') . '";
+         var mercadopago_site_id = "' . $site_id . '";
          MPv1Ticket.paths.loading = "' . getImagePath_ticket('loading.gif') . '";
          MPv1Ticket.getAmount = function() {
             return document.querySelector(MPv1Ticket.selectors.amount).value;
