@@ -7,9 +7,9 @@
  * Author: Mercado Pago
  * Author URI: https://www.mercadopago.com.br/developers/
  * Developer: Marcelo T. Hama (marcelo.hama@mercadolibre.com)
- * Copyright: Copyright(c) MercadoPago [http://www.mercadopago.com]
+ * Copyright: Copyright(c) MercadoPago [https://www.mercadopago.com]
  * Version: 4.2.0
- * License: http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ * License: https://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * Text Domain: wpecomm-mercadopago-module
  * Domain Path: /languages/
  */
@@ -112,7 +112,7 @@ class WPeComm_MercadoPago_Module {
 		echo
 			'<div class="error"><p>' . sprintf(
 				__( 'WPeComm Mercado Pago Module depends on the last version of %s to execute!', 'wpecomm-mercadopago-module' ),
-				'<a href="http://wordpress.org/extend/plugins/wp-e-commerce/">' . 'WP-eCommerce' . '</a>'
+				'<a href="https://wordpress.org/extend/plugins/wp-e-commerce/">' . 'WP-eCommerce' . '</a>'
 			) .
 			'</p></div>';
 	}

@@ -375,3 +375,48 @@ msgstr ""
 
 msgid "Pay With Mercado Pago"
 msgstr ""
+
+msgid "Your payment failed to be processed.<br/>Are you sure you have set all information?"
+msgstr ""
+
+msgid "Your payment could not be completed. Please, try again."
+msgstr ""
+
+msgid "Return and Try Again"
+msgstr ""
+
+msgid "Payment <strong>approved</strong>."
+msgstr ""
+
+msgid "Your payment is under <strong>review</strong>."
+msgstr ""
+
+msgid "Your payment was <strong>refused</strong>."
+msgstr ""
+
+msgid "Your payment is <strong>pending</strong>."
+msgstr ""
+
+msgid "Your payment has been <strong>canceled</strong>."
+msgstr ""
+
+msgid "Your payment is in <strong>mediation</strong>."
+msgstr ""
+
+msgid "Your payment has been <strong>refunded</strong>."
+msgstr ""
+
+msgid "Please, select the ticket issuer of your preference."
+msgstr ""
+
+msgid "Click [Place order] button. The ticket will be generated and you will be redirected to print it."
+msgstr ""
+
+msgid "Important - The order will be confirmed only after the payment approval."
+msgstr ""
+
+msgid "Please, pay the ticket to get your order approved"
+msgstr ""
+
+msgid "Print the Ticket"
+msgstr ""

@@ -376,3 +376,48 @@ msgstr "Medios de Pago"
 
 msgid "Pay With Mercado Pago"
 msgstr "Pagar con Mercado Pago"
+
+msgid "Your payment failed to be processed.<br/>Are you sure you have set all information?"
+msgstr "Su pago no pudo ser procesada.<br/>Esta seguro de que ha introducido toda la información?"
+
+msgid "Your payment could not be completed. Please, try again."
+msgstr "El pago no puede ser completada. Por favor, inténtelo de nuevo."
+
+msgid "Return and Try Again"
+msgstr "Volver y Vuelva a Intentarlo"
+
+msgid "Payment <strong>approved</strong>."
+msgstr "Pago <strong>aprobado</strong>."
+
+msgid "Your payment is under <strong>review</strong>."
+msgstr "Su pago está pendiente de <strong>revisión</strong>."
+
+msgid "Your payment was <strong>refused</strong>."
+msgstr "Su pago se ha <strong>rechazado</strong>."
+
+msgid "Your payment is <strong>pending</strong>."
+msgstr "El pago todavía <strong>no se ha verificado</strong>."
+
+msgid "Your payment has been <strong>canceled</strong>."
+msgstr "Su pago se ha <strong>cancelado</strong>."
+
+msgid "Your payment is in <strong>mediation</strong>."
+msgstr "Su pago esta en <strong>mediación</strong>."
+
+msgid "Your payment has been <strong>refunded</strong>."
+msgstr "Su pago se ha <strong>extornado</strong>."
+
+msgid "Please, select the ticket issuer of your preference."
+msgstr "Por favor, seleccione el emisor de su elección."
+
+msgid "Click [Place order] button. The ticket will be generated and you will be redirected to print it."
+msgstr "Haga clic en el botón [PLACE ORDER]. El ticket será generado y usted será redirigido a imprimirlo."
+
+msgid "Important - The order will be confirmed only after the payment approval."
+msgstr "Importante - La solicitud sólo será confirmada después de la aprobación del pago."
+
+msgid "Please, pay the ticket to get your order approved."
+msgstr "Por favor, realice el pago del ticket para tener su orden aprobada."
+
+msgid "Print the Ticket"
+msgstr "Imprimir el ticket"
