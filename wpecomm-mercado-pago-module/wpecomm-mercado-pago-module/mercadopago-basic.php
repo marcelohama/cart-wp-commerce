@@ -991,7 +991,7 @@ function methods( $methods = null ) {
 					$showmethods .=
 						'<input name="mercadopago_certified_exmethods[]" type="checkbox"' .
 						' checked="yes" value="' . $method['id'] . '"> ' . $icon . ' (' .
-						$method['name'] . ' )<br /><br />';
+						$method['name'] . ')<br /><br />';
 				}
 				/*if ( $activemethods != null && in_array($method['id'], $activemethods ) ) {
 					$showmethods .=
