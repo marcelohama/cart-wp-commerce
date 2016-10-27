@@ -395,30 +395,28 @@ if ( ! class_exists( 'WPeComm_MercadoPago_Module' ) ) :
      * Description: Trigger API to get available categories and proper description.
      * @return an array with found categories and a description for its selector title.
      */
-    /*public static function get_categories() {
-
-      $store_categories_id = array();
-      $store_categories_description = array();
-
-      // Get Mercado Pago store categories.
-      $categories = MPRestClient::get(
+    public static function get_categories( $saved_source ) {
+      $category = get_option( $saved_source );
+      $category = $category === false || is_null( $category ) ? 'others' : $category;
+      // Category marketplace.
+      $list_category = MPRestClient::get(
         array( 'uri' => '/item_categories' ),
         WPeComm_MercadoPago_Module::get_module_version()
       );
-      foreach ( $categories['response'] as $category ) {
-        array_push(
-          $store_categories_id, str_replace( '_', ' ', $category['id'] )
-        );
-        array_push(
-          $store_categories_description, str_replace( '_', ' ', $category['description'] )
-        );
-      }
-
-      return array(
-        'store_categories_id' => $store_categories_id,
-        'store_categories_description' => $store_categories_description
-      );
-
+      $list_category = $list_category['response'];
+      $select_category = '';
+      foreach ( $list_category as $category_arr ) :
+        $selected = '';
+        if ( $category_arr['id'] == $category ) :
+          $selected = 'selected="selected"';
+        endif;
+        $select_category .=
+          '<option value="' . $category_arr['id'] .
+          '" id="type-checkout-' . $category_arr['description'] .
+          '" ' . $selected . ' >' . $category_arr['description'] .
+          '</option>';
+      endforeach;
+      return $select_category;
     }
 
     /**
@@ -441,6 +439,34 @@ if ( ! class_exists( 'WPeComm_MercadoPago_Module' ) ) :
         }
       }
       return -1;
+    }
+
+    /**
+     * Summary: This open/save the currency conversion option selector and build its html.
+     * Description: This open/save the currency conversion option selector and build its html.
+     * @return the html, as a string.
+     */
+    public static function currency_conversion( $used_currency ) {
+      $currencyconversion = get_option( $used_currency );
+      $currencyconversion =
+        $currencyconversion === false || is_null( $currencyconversion ) ?
+        'inactive' : $currencyconversion;
+      $currencyconversion_options = array(
+        array( 'value' => 'active', 'text' => 'Active' ),
+        array( 'value' => 'inactive', 'text' => 'Inactive' )
+      );
+      foreach ( $currencyconversion_options as $op_currencyconversion ) :
+        $selected = '';
+        if ( $op_currencyconversion['value'] == $currencyconversion ) :
+          $selected = 'selected="selected"';
+        endif;
+        $select_currencyconversion .=
+          '<option value="' . $op_currencyconversion['value'] .
+          '" id="currencyconversion-' . $op_currencyconversion['value'] .
+          '" ' . $selected . '>' .
+          __( $op_currencyconversion['text'], 'wpecomm-mercadopago-module' ) . '</option>';
+      endforeach;
+      return $select_currencyconversion;
     }
 
     /**
