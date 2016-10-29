@@ -18,7 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 include_once 'mercadopago-lib/mercadopago.php';
 
 $nzshpcrt_gateways[$num] = array(
-	'name' =>	__( 'Mercado Pago - Basic Checkout', 'wpecomm-mercadopago-module' ),
+	'name' => __( 'Mercado Pago - Basic Checkout', 'wpecomm-mercadopago-module' ),
+	//'api_version' => 2.0,
 	'class_name' => 'WPSC_Merchant_MercadoPago_Basic',
 	'display_name' => __( 'Mercado Pago - Basic Checkout', 'wpecomm-mercadopago-module' ),
 	'requirements' => array(
@@ -224,17 +225,13 @@ function submit_mercadopago_basic() {
 	} else {
 		update_option( 'mercadopago_certified_exmethods', '' );
 	}*/
-	// TODO =====
-	try {
-		$mp = new MP(
-			WPeComm_MercadoPago_Module::get_module_version(),
-			get_option( 'mercadopago_certified_clientid' ),
-			get_option( 'mercadopago_certified_clientsecret' )
-		);
-		$payment_split_mode = trim( $_POST['mercadopago_certified_twocards'] );
-		$response = $mp->set_two_cards_mode( $payment_split_mode );
-	} catch ( MercadoPagoException $e ) {}
-	// TODO =====
+	$mp = new MP(
+		WPeComm_MercadoPago_Module::get_module_version(),
+		get_option( 'mercadopago_certified_clientid' ),
+		get_option( 'mercadopago_certified_clientsecret' )
+	);
+	$payment_split_mode = trim( $_POST['mercadopago_certified_twocards'] );
+	$response = $mp->set_two_cards_mode( $payment_split_mode );
 	if ( isset( $_POST['mercadopago_certified_sandbox'] ) ) {
 		update_option(
 			'mercadopago_certified_sandbox',
@@ -289,7 +286,8 @@ function form_mercadopago_basic() {
 	// Trigger API to get payment methods and site_id, also validates Client_id/Client_secret.
 	if ( $result['is_valid'] == true ) {
 		// Checking the currency.
-		if ( ! is_supported_currency( $result['country_configs']['currency'] ) ) {
+		if ( ! WPeComm_MercadoPago_Module::is_supported_currency(
+		$result['country_configs']['currency'] ) ) {
 			if ( get_option( 'mercadopago_certified_currencyconversion' ) == 'inactive' ) {
 				$result['currency_ratio'] = -1;
 				$currency_message .= WPeComm_MercadoPago_Module::build_currency_not_converted_msg(
@@ -298,26 +296,15 @@ function form_mercadopago_basic() {
 				);
 			} elseif ( get_option( 'mercadopago_certified_currencyconversion' ) == 'active' &&
 			$result['currency_ratio'] != -1 ) {
-				$currency_message .= '<img width="12" height="12" src="' .
-					plugins_url(
-						'wpsc-merchants/mercadopago-images/check.png',
-						plugin_dir_path( __FILE__ )
-					) . '"> ' .
-					__( 'CURRENCY CONVERTED: The currency conversion ratio from', 'wpecomm-mercadopago-module' ) .
-					' ' . $store_currency . ' ' . __( 'to', 'wpecomm-mercadopago-module' ) . ' ' .
-					$result['country_configs']['currency'] .
-					__( ' is: ', 'wpecomm-mercadopago-module' ) . $result['currency_ratio'] . '.';
+				$currency_message .= WPeComm_MercadoPago_Module::build_currency_converted_msg(
+					$result['country_configs']['currency'],
+					$result['currency_ratio']
+				);
 			} else {
 				$result['currency_ratio'] = -1;
-				$currency_message .= '<img width="12" height="12" src="' .
-					plugins_url(
-						'wpsc-merchants/mercadopago-images/error.png',
-						plugin_dir_path( __FILE__ )
-					) . '"> ' .
-					__( 'ERROR: It was not possible to convert the unsupported currency', 'wpecomm-mercadopago-module' ) .
-					' ' . $store_currency . ' '	. __( 'to', 'wpecomm-mercadopago-module' ) . ' ' .
-					$result['country_configs']['currency'] . '.' .
-					' ' . __( 'Currency conversions should be made outside this module.', 'wpecomm-mercadopago-module' );
+				$currency_message .= WPeComm_MercadoPago_Module::build_currency_conversion_err_msg(
+					$result['country_configs']['currency']
+				);
 			}
 		} else {
 			$result['currency_ratio'] = -1;
@@ -384,8 +371,8 @@ function form_mercadopago_basic() {
 			plugins_url(
 				'wpsc-merchants/mercadopago-images/mplogo.png',
 				plugin_dir_path( __FILE__ )
-			) .
-			'"></td>
+			) . '">
+		</td>
 		<td>
 			<input type="hidden" size="60" value="' .
 			$result['site_id'] .
@@ -423,8 +410,8 @@ function form_mercadopago_basic() {
 				sprintf(
 					__( 'You can obtain your credentials for', 'wpecomm-mercadopago-module' ) . ' %s.',
 					$api_secret_locale
-				) . '
-			</p>
+				) .
+			'</p>
 		</td>
 	</tr>
 	<tr>
@@ -492,8 +479,11 @@ function form_mercadopago_basic() {
 	</tr>
 	<tr>
 		<td>' . __( 'Integration Method', 'wpecomm-mercadopago-module' ) . '</td>
-		<td>' . type_checkout() .
-			'<p class="description">' .
+		<td>' .
+			'<select name="mercadopago_certified_typecheckout" id="type_checkout">' .
+				type_checkout() .
+			'</select>
+			<p class="description">' .
 				__( 'Select how your clients should interact with Mercado Pago. Modal Window (inside your store), Redirect (Client is redirected to Mercado Pago), or iFrame (an internal window is embedded to the page layout).', 'wpecomm-mercadopago-module' ) . '
 			</p>
 		</td>
@@ -608,7 +598,7 @@ function form_mercadopago_basic() {
 		<td>' . __( 'Enable Sandbox', 'wpecomm-mercadopago-module' ) . '</td>
 		<td>' .
 			'<select name="mercadopago_certified_sandbox" id="sandbox">' .
-				sandbox() .
+				WPeComm_MercadoPago_Module::sandbox( 'mercadopago_certified_sandbox' ) .
 			'</select>
 			<p class="description">' .
 				__( 'This option allows you to test payments inside a sandbox environment.', 'wpecomm-mercadopago-module' ) .
@@ -617,8 +607,11 @@ function form_mercadopago_basic() {
 	</tr>
 	<tr>
 		<td>' . __( 'Debug mode', 'wpecomm-mercadopago-module' ) . '</td>
-		<td>' . debugs() .
-			'<p class="description">' .
+		<td>' .
+			'<select name="mercadopago_certified_debug">' .
+				WPeComm_MercadoPago_Module::debugs( 'mercadopago_certified_debug' ) .
+			'</select>
+			<p class="description">' .
 				__( 'Enable to display log messages in browser console (not recommended in production environment)', 'wpecomm-mercadopago-module' ) .
 			'</p>
 		</td>
@@ -628,10 +621,18 @@ function form_mercadopago_basic() {
 
 }
 
-/*===============================================================================
-	FUNCTIONS TO PROCESS PAYMENT (CLIENT SIDE)
-================================================================================*/
+/*
+ * ========================================================================
+ * CHECKOUT BUSINESS RULES (CLIENT SIDE)
+ * ========================================================================
+ */
 
+/**
+ * Summary: Build Mercado Pago preference.
+ * Description: Create Mercado Pago preference and get init_point URL based in the order options
+ * from the cart.
+ * @return the preference object.
+ */
 function function_mercadopago_basic( $seperator, $sessionid ) {
 
 	global $wpdb, $wpsc_cart;
@@ -664,15 +665,44 @@ function function_mercadopago_basic( $seperator, $sessionid ) {
 	$country_configs = WPeComm_MercadoPago_Module::get_country_config( $site_id );
 
 	// Get currency ratio.
-	$currency_ratio = ( (float) get_option( 'mercadopago_certified_currencyratio' ) ) > 0 ?
-		( (float) get_option( 'mercadopago_certified_currencyratio' ) ) : 1;
+	$currency_ratio = 1;
+	if ( get_option( 'mercadopago_certified_currencyconversion' ) == 'active' ) {
+		$currency_ratio = (float) WPeComm_MercadoPago_Module::get_conversion_rate(
+			$country_configs['currency']
+		);
+	}
 
-	// Using a string to register each item (this is a workaround to deal with API problem that shows only first item).
+	// String to register each item (workaround to deal with API that shows only first item).
 	$list_of_items = array();
-
 	// Products.
 	$items = array();
 	if ( sizeof( $wpsc_cart->cart_items ) > 0 ) {
+		// Tax fees cost as an item.
+		array_push( $items, array(
+			'id' => 2147483647,
+			'title' => get_option( 'mercadopago_certified_checkoutmessage1' ),
+			'description' => get_option( 'mercadopago_certified_checkoutmessage1' ),
+			'category_id' => get_option( 'mercadopago_certified_category' ),
+			'quantity' => 1,
+			'unit_price' => ( (float) ( $wpsc_cart->total_tax ) ) * $currency_ratio,
+			'currency_id' => $country_configs['currency']
+		) );
+		// Shipment cost as an item.
+		$ship_cost = $currency_ratio * (
+			(float) $wpsc_cart->base_shipping + (float) $wpsc_cart->total_item_shipping
+		);
+		if ( $ship_cost > 0 ) {
+			array_push( $list_of_items, get_option( 'mercadopago_certified_checkoutmessage2' ) );
+			array_push( $items, array(
+				'id' => 2147483647,
+				'title' => $wpsc_cart->selected_shipping_option,
+				'description' => get_option( 'mercadopago_certified_checkoutmessage2' ),
+				'category_id' => get_option( 'mercadopago_certified_category' ),
+				'quantity' => 1,
+				'unit_price' => $ship_cost,
+				'currency_id' => $country_configs['currency']
+			) );
+		}
 		foreach ( $wpsc_cart->cart_items as $i => $item ) {
 			if ( $item->quantity > 0 ) {
 				$product = get_post( $item->product_id );
@@ -704,39 +734,7 @@ function function_mercadopago_basic( $seperator, $sessionid ) {
 				) );
 			}
 		}
-		// Tax fees cost as an item.
-		array_push( $items, array(
-			'title' => get_option( 'mercadopago_certified_checkoutmessage1' ),
-			'description' => get_option( 'mercadopago_certified_checkoutmessage1' ),
-			'category_id' => get_option( 'mercadopago_certified_category' ),
-			'quantity' => 1,
-			'unit_price' => (
-				( (float) ( $wpsc_cart->total_tax ) )
-			) * (
-				(float) get_option( 'mercadopago_certified_currencyratio' ) > 0 ?
-				(float) get_option( 'mercadopago_certified_currencyratio' ) : 1
-			),
-			'currency_id' => $country_configs['currency']
-		) );
-		$ship_cost = (
-			( (float) $wpsc_cart->base_shipping ) + ( (float) $wpsc_cart->total_item_shipping )
-		) * (
-			(float) get_option( 'mercadopago_certified_currencyratio' ) > 0 ?
-			(float) get_option( 'mercadopago_certified_currencyratio' ) : 1
-		);
-		if ( $ship_cost > 0 ) {
-			array_push( $list_of_items, get_option( 'mercadopago_certified_checkoutmessage2' ) );
-			// Shipment cost as an item.
-			array_push( $items, array(
-				'title' => $wpsc_cart->selected_shipping_option,
-				'description' => get_option( 'mercadopago_certified_checkoutmessage2' ),
-				'category_id' => get_option( 'mercadopago_certified_category' ),
-				'quantity' => 1,
-				'unit_price' => $ship_cost,
-				'currency_id' => $country_configs['currency']
-			) );
-		}
-		// Using a string to register each item (this is a workaround to deal with API problem that shows only first item).
+		// String to register each item (workaround to deal with API that shows only first item).
 		$items[0]['title'] = implode( ', ', $list_of_items );
 	}
 
@@ -824,36 +822,13 @@ function function_mercadopago_basic( $seperator, $sessionid ) {
 	if ( ! strrpos( get_site_url(), 'localhost' ) ) {
 		$preferences['notification_url'] = WPeComm_MercadoPago_Module::workaround_ampersand_bug(
 			// TODO: check if this is really working...
-			get_site_url() . '/wpecomm-mercadopago-module/?wc-api=WC_WPeCommMercadoPago_Gateway'
+			get_site_url() . '/wpecomm-mercadopago-module'
 		);
 	}
 
 	// Set sponsor ID.
 	if ( get_option( 'mercadopago_certified_istestuser' ) == 'no' ) {
-		switch ( $site_id ) {
-			case 'MLA':
-				$preferences[ 'sponsor_id' ] = 219693774;
-				break;
-			case 'MLB':
-				$preferences[ 'sponsor_id' ] = 219691508;
-				break;
-			case 'MLC':
-				$preferences[ 'sponsor_id' ] = 219691655;
-				break;
-			case 'MCO':
-				$preferences[ 'sponsor_id' ] = 219695429;
-				break;
-			case 'MLM':
-				$preferences[ 'sponsor_id' ] = 219696864;
-				break;
-			case 'MPE':
-				$preferences[ 'sponsor_id' ] = 219692012;
-				break;
-			case 'MLV':
-				$preferences[ 'sponsor_id' ] = 219696139;
-				break;
-			default:;
-		}
+		$preferences['sponsor_id'] = $country_configs['sponsor_id'];
 	}
 
 	// Auto return options.
@@ -862,7 +837,7 @@ function function_mercadopago_basic( $seperator, $sessionid ) {
 	}
 
 	// Log created preferences.
-	if ( get_option( 'mercadopago_certified_debug' ) == 'Yes' ) {
+	if ( get_option( 'mercadopago_certified_debug' ) == 'active' ) {
 		debug_to_console_basic(
 			'@' . __FUNCTION__ . ' - ' .
 			'Preferences created, now processing it: ' .
@@ -881,34 +856,27 @@ function process_payment_wpecomm_mp_basic( $preferences, $wpsc_cart ) {
 		get_option( 'mercadopago_certified_clientid' ),
 		get_option( 'mercadopago_certified_clientsecret' )
 	);
-	$access_token = $mp->get_access_token();
-	$isTestUser = get_option( 'mercadopago_certified_istestuser' );
 
 	// Trigger API to create payment.
 	$preferenceResult = $mp->create_preference( $preferences );
+
 	if ( $preferenceResult['status'] == 201 ) {
+
 		if ( get_option( 'mercadopago_certified_sandbox' ) == 'active' ) {
 			$link = $preferenceResult['response']['sandbox_init_point'];
 		} else {
 			$link = $preferenceResult['response']['init_point'];
 		}
+
 		$site_id = get_option( 'mercadopago_certified_siteid', 'MLA' );
-		if ( empty( $site_id) || $site_id == null )
+		if ( empty( $site_id) || $site_id == null ) {
 			$site_id = 'MLA';
-		// Build payment banner url.
-		$banners_mercadopago_standard = array(
-			'MLA' => 'MLA/standard.jpg',
-			'MLB' => 'MLB/standard.jpg',
-			'MCO' => 'MCO/standard.jpg',
-			'MLC' => 'MLC/standard.gif',
-			'MPE' => 'MPE/standard.png',
-			'MLV' => 'MLV/standard.jpg',
-			'MLM' => 'MLM/standard.jpg'
-		);
-		$html =
-			'<img alt="Mercado Pago" title="Mercado Pago" width="468" height="60" src="' .
-			plugins_url( 'wpsc-merchants/mercadopago-images/' .
-				$banners_mercadopago_standard[$site_id], plugin_dir_path( __FILE__ ) ) . '">';
+		}
+		$country_configs = WPeComm_MercadoPago_Module::get_country_config( $site_id );
+
+		$html = '<img alt="Mercado Pago" title="Mercado Pago" width="468" height="60" src="' .
+			$country_configs['checkout_banner'] . '">';
+
 		if ( $link ) {
 			// Build payment button html code.
 			switch ( get_option( 'mercadopago_certified_typecheckout' ) ) {
@@ -949,6 +917,7 @@ function process_payment_wpecomm_mp_basic( $preferences, $wpsc_cart ) {
 		} else {
 			$html = '<p>' . get_option( 'mercadopago_certified_checkoutmessage6' ) . '</p>';
 		}
+
 		// Show page.
 		get_header();
 		$page = '<div style="position: relative; margin: 20px 0;" >';
@@ -957,21 +926,27 @@ function process_payment_wpecomm_mp_basic( $preferences, $wpsc_cart ) {
 				$page .= $html;
 			$page .= '</div>';
 		$page .= '</div>';
-		echo $page;
+		echo str_replace( 'http:', 'https:', $page );
 		get_footer();
 		exit;
+
 	} else {
+
 		// TODO: create a better user feedback...
 		get_header();
 		echo 'Error: ' . $preferenceResult['status'];
 		get_footer();
 		exit();
+
 	}
+
 }
 
-/*===============================================================================
-	FUNCTIONS TO GENERATE VIEWS
-================================================================================*/
+/*
+ * ========================================================================
+ * FUNCTIONS TO GENERATE VIEWS (SERVER SIDE)
+ * ========================================================================
+ */
 
 function methods( $methods = null ) {
 
@@ -1101,15 +1076,8 @@ function type_checkout() {
 	$type_checkout = get_option( 'mercadopago_certified_typecheckout' );
 	$type_checkout =
 		$type_checkout === false || is_null( $type_checkout ) ? 'Redirect' : $type_checkout;
+	$type_checkout_options = array( 'Iframe', 'Modal Window', 'Redirect' );
 
-	// Type Checkout.
-	$type_checkout_options = array(
-		'Iframe',
-		'Modal Window',
-		'Redirect'
-	);
-
-	$select_type_checkout = '<select name="mercadopago_certified_typecheckout" id="type_checkout">';
 	foreach ( $type_checkout_options as $select_type ) :
 		$selected = '';
 		if ( $select_type == $type_checkout ) :
@@ -1122,62 +1090,7 @@ function type_checkout() {
 			'</option>';
 	endforeach;
 
-	$select_type_checkout .= '</select>';
 	return $select_type_checkout;
-
-}
-
-function sandbox() {
-
-	$sandbox = get_option( 'mercadopago_certified_sandbox' );
-	$sandbox = $sandbox === false || is_null( $sandbox ) ? 'inactive' : $sandbox;
-	$sandbox_options = array(
-		array( 'value' => 'active', 'text' => 'Active' ),
-		array( 'value' => 'inactive', 'text' => 'Inactive' )
-	);
-
-	foreach ( $sandbox_options as $op_sandbox ) :
-		$selected = '';
-		if ( $op_sandbox['value'] == $sandbox ) :
-			$selected = 'selected="selected"';
-		endif;
-		$select_sandbox .=
-			'<option value="' . $op_sandbox['value'] .
-			'" id="sandbox-' . $op_sandbox['value'] .
-			'" ' . $selected . '>' . __( $op_sandbox['text'], 'wpecomm-mercadopago-module' ) .
-			'</option>';
-	endforeach;
-
-	return $select_sandbox;
-
-}
-
-function debugs() {
-
-	if ( get_option( 'mercadopago_certified_debug' ) == null ||
-	get_option( 'mercadopago_certified_debug' ) == '' ) {
-		$mercadopago_certified_debug = 'No';
-	} else {
-		$mercadopago_certified_debug = get_option( 'mercadopago_certified_debug' );
-	}
-
-	$debugs = array( 'No','Yes' );
-	$showdebugs = '<select name="mercadopago_certified_debug">';
-
-	foreach ( $debugs as	$debug ) :
-		if ( $debug == $mercadopago_certified_debug ) {
-			$showdebugs .=
-				'<option value="' . $debug . '" selected="selected">' .
-				__( $debug, 'wpecomm-mercadopago-module') . '</option>';
-		} else {
-			$showdebugs .=
-				'<option value="' . $debug . '">' .
-				__( $debug, 'wpecomm-mercadopago-module') . '</option>';
-		}
-	endforeach;
-
-	$showdebugs .= '</select>';
-	return $showdebugs;
 
 }
 
@@ -1210,56 +1123,47 @@ function validate_credentials( $client_id, $client_secret ) {
 		return $result;
 	}
 
-	try {
+	$mp = new MP(
+		WPeComm_MercadoPago_Module::get_module_version(),
+		$client_id,
+		$client_secret
+	);
+	$access_token = $mp->get_access_token();
+	$get_request = $mp->get( '/users/me?access_token=' . $access_token );
 
-		$mp = new MP(
-			WPeComm_MercadoPago_Module::get_module_version(),
-			$client_id,
-			$client_secret
-		);
-		$access_token = $mp->get_access_token();
-		$get_request = $mp->get( '/users/me?access_token=' . $access_token );
+	if ( isset( $get_request['response']['site_id'] ) ) {
 
-		if ( isset( $get_request['response']['site_id'] ) ) {
+		$result['is_test_user'] = in_array( 'test_user', $get_request['response']['tags'] ) ?
+			'yes' : 'no';
+		$result['site_id'] = $get_request['response']['site_id'];
+		$result['collector_id'] = $get_request['response']['id'];
+		$result['country_configs'] =
+			WPeComm_MercadoPago_Module::get_country_config( $result['site_id'] );
+		$result['payment_split_mode'] = $mp->check_two_cards();
 
-			$result['is_test_user'] = in_array( 'test_user', $get_request['response']['tags'] ) ?
-				'yes' : 'no';
-			$result['site_id'] = $get_request['response']['site_id'];
-			$result['collector_id'] = $get_request['response']['id'];
-			$result['country_configs'] =
-				WPeComm_MercadoPago_Module::get_country_config( $result['site_id'] );
-			$result['payment_split_mode'] = $mp->check_two_cards();
+		$payment_methods = $mp->get( '/v1/payment_methods/?access_token=' . $access_token );
+		$payment_methods = $payment_methods['response'];
+		$arr = array();
+		foreach ( $payment_methods as $payment ) {
+			$arr[] = $payment['id'];
+		}
+		$result['payment_methods'] = $payment_methods;
+		$result['all_payment_methods'] = implode( ',', $arr );
 
-			$payment_methods = $mp->get( '/v1/payment_methods/?access_token=' . $access_token );
-			$payment_methods = $payment_methods['response'];
-			$arr = array();
-			foreach ( $payment_methods as $payment ) {
-				$arr[] = $payment['id'];
-			}
-			$result['payment_methods'] = $payment_methods;
-			$result['all_payment_methods'] = implode( ',', $arr );
-
-			// Check for auto converstion of currency (only if it is enabled).
-			$result['currency_ratio'] = -1;
-			if ( get_option( 'mercadopago_certified_currencyconversion' ) == 'active' ) {
-				$result['currency_ratio'] = WPeComm_MercadoPago_Module::get_conversion_rate(
-					$result['country_configs']['currency']
-				);
-			}
-
-			$result['is_valid'] = true;
+		// Check for auto converstion of currency (only if it is enabled).
+		$result['currency_ratio'] = -1;
+		if ( get_option( 'mercadopago_certified_currencyconversion' ) == 'active' ) {
+			$result['currency_ratio'] = WPeComm_MercadoPago_Module::get_conversion_rate(
+				$result['country_configs']['currency']
+			);
 		}
 
-	} catch ( MercadoPagoException $e ) {}
+		$result['is_valid'] = true;
+
+	}
 
 	return $result;
 
-}
-
-// Return boolean indicating if currency is supported.
-function is_supported_currency( $used_currency ) {
-	$store_currency_code = WPSC_Countries::get_currency_code( absint( get_option( 'currency_type' ) ) );
-	return $store_currency_code == $used_currency;
 }
 
 function debug_to_console_basic( $data ) {
@@ -1270,8 +1174,29 @@ function debug_to_console_basic( $data ) {
 	echo $output;*/
 }
 
-/*===============================================================================
-	INSTANTIATIONS
-================================================================================*/
+/*
+ * ========================================================================
+ * IPN MECHANICS (SERVER SIDE)
+ * ========================================================================
+ */
+
+/**
+ * Summary: This call checks any incoming notifications from Mercado Pago server.
+ * Description: This call checks any incoming notifications from Mercado Pago server.
+ */
+function check_ipn_response() {
+	@ob_clean();
+	//$data = $check_ipn_request_is_valid( $_GET );
+	if ( $data ) {
+		header( 'HTTP/1.1 200 OK' );
+		//do_action( 'valid_mercadopago_ipn_request', $data );
+	}
+}
+
+/*
+ * ========================================================================
+ * INSTANTIATIONS
+ * ========================================================================
+ */
 
 new WPSC_Merchant_MercadoPago_Basic();
