@@ -1318,7 +1318,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array) get_option( 'custom_g
 
 			<div class="mp-box-inputs mp-col-100" id="mercadopago-utilities" style="padding:0px 36px 0px 36px;">
 				<input type="hidden" id="site_id" name="mercadopago_custom[site_id]"/>
-				<input type="text" id="amount" value="' . $amount . '" name="mercadopago_custom[amount]"/>
+				<input type="hidden" id="amount" value="' . $amount . '" name="mercadopago_custom[amount]"/>
 				<input type="hidden" id="paymentMethodId" name="mercadopago_custom[paymentMethodId]"/>
 				<input type="hidden" id="token" name="mercadopago_custom[token]"/>
 				<input type="hidden" id="cardTruncated" name="mercadopago_custom[cardTruncated]"/>
