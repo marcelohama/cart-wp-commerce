@@ -225,13 +225,15 @@ function submit_mercadopago_basic() {
 	} else {
 		update_option( 'mercadopago_certified_exmethods', '' );
 	}*/
-	$mp = new MP(
-		WPeComm_MercadoPago_Module::get_module_version(),
-		get_option( 'mercadopago_certified_clientid' ),
-		get_option( 'mercadopago_certified_clientsecret' )
-	);
-	$payment_split_mode = trim( $_POST['mercadopago_certified_twocards'] );
-	$response = $mp->set_two_cards_mode( $payment_split_mode );
+	if ( ! empty( $_POST['mercadopago_certified_twocards'] ) ) {
+		$mp = new MP(
+			WPeComm_MercadoPago_Module::get_module_version(),
+			get_option( 'mercadopago_certified_clientid' ),
+			get_option( 'mercadopago_certified_clientsecret' )
+		);
+		$payment_split_mode = trim( $_POST['mercadopago_certified_twocards'] );
+		$response = $mp->set_two_cards_mode( $payment_split_mode );
+	}
 	if ( isset( $_POST['mercadopago_certified_sandbox'] ) ) {
 		update_option(
 			'mercadopago_certified_sandbox',

@@ -108,7 +108,7 @@ class WPSC_Merchant_MercadoPago_Ticket extends wpsc_merchant {
 		! empty( $_REQUEST['mercadopago_ticket']['paymentMethodId'] ) ) {
 
 			// Creates the order parameters by checking the cart configuration.
-			$preference = $this->create_preference( $wpdb, $wpsc_cart, $form_labels );
+			$preference = $this->build_payment_preference( $wpdb, $wpsc_cart, $form_labels );
 			$preference['payment_method_id'] = $_REQUEST['mercadopago_ticket']['paymentMethodId'];
 
 			// Create order preferences with Mercado Pago API request.
@@ -442,7 +442,10 @@ function validate_credentials_ticket( $access_token ) {
 
 	try {
 
-		$mp = new MP( $access_token );
+		$mp = new MP(
+			WPeComm_MercadoPago_Module::get_module_version(),
+			$access_token
+		);
 		$result['access_token'] = $access_token;
 		// TODO: We should refactor this... it makes no sense to fetch access token already having it.
 		// This is necessary to set access token in Mercado Pago SDK class.
@@ -606,294 +609,306 @@ function form_mercadopago_ticket() {
 		$url_pending = get_site_url();
 	}
 
-	// send output to generate settings page
-	// TODO: ===== parei aqui =====
-	$output = "
-		<tr>
-			<td></td>
-			<td><h3><strong>" . __('Mercado Pago Credentials', 'wpecomm-mercadopago-module' ) . "</strong></h3></td>
-		</tr>
-		<tr>
-			<td>
-				<img width='200' height='52' src='" .
-					plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) .
-				"'>
-			</td>
-			<td>
-				<input type='hidden' size='60' value='" . $result['site_id'] . "' name='mercadopago_ticket_siteid' />
-				<input type='hidden' size='60' value='" .
-					json_encode( $form_labels ) .
-					"' name='mercadopago_ticket_checkoutmessage1' />
-				<input type='hidden' size='60' value='" . $result['is_test_user'] . "' name='mercadopago_ticket_istestuser' />
-				<input type='hidden' size='60' value='" . $result['currency_ratio'] . "' name='mercadopago_ticket_currencyratio' />
-				<input type='hidden' size='60' value='" .
-					json_encode( $result['payment_methods'] ) .
-					"' name='mercadopago_ticket_payment_methods' />
-				<p><a href='https://wordpress.org/support/view/plugin-reviews/wpecomm-mercado-pago-module?filter=5#postform' target='_blank' class='button button-primary'>" . sprintf(
-						__( 'Please, rate us %s on WordPress.org and give your feedback to help improve this module!', 'wpecomm-mercadopago-module' ),
-						'&#9733;&#9733;&#9733;&#9733;&#9733;'
-						) . "
-				</a></p><br>
-				<p class='description'>" .
-					sprintf( '%s', $credentials_message ) . '<br>' . sprintf(
-						__( 'You can obtain your credentials for', 'wpecomm-mercadopago-module' ) . ' %s.',
-						$api_secret_locale ) . "
-				</p>
-			</td>
-		</tr>
-		<tr>
-			<td>" . __('Access Token', 'wpecomm-mercadopago-module' ) . "</td>
-			<td>
-				<input type='text' size='60' value='" . get_option('mercadopago_ticket_accesstoken') . "' name='mercadopago_ticket_accesstoken' />
-				<p class='description'>
-					" . __( "Insert your Mercado Pago Access Token.", 'wpecomm-mercadopago-module' ) . "
-				</p>
-			</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td><h3><strong>" . __('Checkout Options', 'wpecomm-mercadopago-module' ) . "</strong></h3></td>
-		</tr>" .
-		/*<tr>
-			<td>" . __('Coupons', 'wpecomm-mercadopago-module' ) . "</td>
-			<td>" .
-				coupom_ticket() . "
-				<p class='description'>" .
-					__( "If there is a Mercado Pago campaign, allow your store to give discounts to customers.", 'wpecomm-mercadopago-module' ) . "
-				</p>
-			</td>
-		</tr>*/
-		"<tr>
-			<td>" . __('Store Category', 'wpecomm-mercadopago-module' ) . "</td>
-			<td>" .
-				category_ticket() . "
-				<p class='description'>" .
-					__( "Define which type of products your store sells.", 'wpecomm-mercadopago-module' ) . "
-				</p>
-			</td>
-		</tr>
-		<tr>
-			<td>" . __('Store Identificator', 'wpecomm-mercadopago-module' ) . "</td>
-			<td>
-				<input type='text' size='60' value='" . (get_option( 'mercadopago_ticket_invoiceprefix') == "" ? "WPeComm-" : get_option( 'mercadopago_ticket_invoiceprefix')) . "' name='mercadopago_ticket_invoiceprefix' />
-				<p class='description'>" .
-					__( "Please, inform a prefix to your store.", "wpecomm-mercadopago-module" ) . ' ' .
-					__( "If you use your Mercado Pago account on multiple stores you should make sure that this prefix is unique as Mercado Pago will not allow orders with same identificators.", "wpecomm-mercadopago-module" ) . "
-				</p>
-			</td>
-		</tr>
-		<tr>
-			<td>" . __('URL Approved Payment', 'wpecomm-mercadopago-module') . "</td>
-			<td>
-				<input name='mercadopago_ticket_url_sucess' type='text' value='" . $url_sucess . "'/>
-				<p class='description'>" .
-					__( 'This is the URL where the customer is redirected if his payment is approved.',
-						'wpecomm-mercadopago-module' ) . "
-				</p>
-			</td>
-		</tr>
-		<tr>
-			<td>" . __('URL Pending Payment', 'wpecomm-mercadopago-module') . "</td>
-			<td>
-				<input name='mercadopago_ticket_url_pending' type='text' value='" . $url_pending . "'/>
-				<p class='description'>" .
-					__( 'This is the URL where the customer is redirected if his payment is in process.',
-						'wpecomm-mercadopago-module' ) . "
-				</p>
-			</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td><h3><strong>" . __('Payment Options', 'wpecomm-mercadopago-module') . "</strong></h3></td>
-		</tr>
-		<tr>
-			<td>" . __('Currency Conversion', 'wpecomm-mercadopago-module') . "</td>
-			<td>" .
-				currency_conversion_ticket() . "
-				<p class='description'>" .
-					__('If the used currency in WPeCommerce is different or not supported by Mercado Pago, convert values of your transactions using Mercado Pago currency ratio', 'wpecomm-mercadopago-module') . "<br >" .
-					__(sprintf('%s', $currency_message)) . "
-				</p>
-			</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td><h3><strong>" . __('Test and Debug Options', 'wpecomm-mercadopago-module') . "</strong></h3></td>
-		</tr>
-		<tr>
-			<td>" . __('Debug mode', 'wpecomm-mercadopago-module') . "</td>
-			<td>" .
-				debugs_ticket() . "
-				<p class='description'>" .
-				__('Enable to display log messages in browser console (not recommended in production environment)', 'wpecomm-mercadopago-module') . "
-				</p>
-			</td>
-		</tr>\n";
+	// Send output to generate settings page.
+	$output = '
+	<tr>
+		<td>
+			<img width="200" height="52" src="' .
+			plugins_url(
+				'wpsc-merchants/mercadopago-images/mplogo.png',
+				plugin_dir_path( __FILE__ )
+			) . '">
+		</td>
+		<td>
+			<input type="hidden" size="60" value="' .
+			$result['site_id'] .
+			'" name="mercadopago_ticket_siteid" />' .
+
+			"<input type='hidden' size='60' value='" .
+			json_encode( $form_labels ) . // I really dislike this
+			"' name='mercadopago_ticket_checkoutmessage1' />" .
+
+			'<input type="hidden" size="60" value="' .
+			$result['is_test_user'] .
+			'" name="mercadopago_ticket_istestuser" />
+			<input type="hidden" size="60" value="' .
+			$result['currency_ratio'] .
+			'" name="mercadopago_ticket_currencyratio" />' .
+
+			"<input type='hidden' size='60' value='" .
+			json_encode( $result['payment_methods'] ) .
+			"' name='mercadopago_ticket_payment_methods' />" .
+
+			'<strong>' . __( 'Mercado Pago Credentials', 'wpecomm-mercadopago-module' ) . '</strong>
+			<p class="description">' .
+				sprintf( '%s', $credentials_message ) . '<br>' .
+				sprintf(
+					__( 'You can obtain your credentials for', 'wpecomm-mercadopago-module' ) . ' %s.',
+					$api_secret_locale
+				) .
+			'</p>
+		</td>
+	</tr>
+	<tr>
+		<td>' . __( 'Access Token', 'wpecomm-mercadopago-module' ) . '</td>
+		<td>
+			<input type="text" size="60" value="' .
+			get_option('mercadopago_ticket_accesstoken') .
+			'" name="mercadopago_ticket_accesstoken" />
+			<p class="description">' .
+				__( 'Insert your Mercado Pago Access Token.', 'wpecomm-mercadopago-module' ) .
+			'</p>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><h3><strong>' .
+			__( 'Checkout Options', 'wpecomm-mercadopago-module' ) .
+		'</strong></h3></td>
+	</tr>' .
+	/*<tr>
+		<td>' . __('Coupons', 'wpecomm-mercadopago-module' ) . '</td>
+		<td>' .
+			coupom_ticket() . '
+			<p class='description">' .
+				__( 'If there is a Mercado Pago campaign, allow your store to give discounts to customers.', 'wpecomm-mercadopago-module' ) . '
+			</p>
+		</td>
+	</tr>*/
+	'<tr>
+		<td>' . __( 'Store Category', 'wpecomm-mercadopago-module' ) . '</td>
+		<td>
+			<select name="mercadopago_ticket_category" id="category" style="max-width:600px;>' .
+				WPeComm_MercadoPago_Module::get_categories( 'mercadopago_ticket_category' ) .
+			'</select>
+			<p class="description">' .
+				__( 'Define which type of products your store sells.', 'wpecomm-mercadopago-module' ) .
+			'</p>
+		</td>
+	</tr>
+	<tr>
+		<td>' . __( 'Store Identificator', 'wpecomm-mercadopago-module' ) . '</td>
+		<td>
+			<input type="text" size="60" value="' . (
+			get_option( 'mercadopago_ticket_invoiceprefix' ) == '' ?
+				'WPeComm-' : get_option( 'mercadopago_ticket_invoiceprefix' )
+			) . '" name="mercadopago_ticket_invoiceprefix" />
+			<p class="description">' .
+				__( 'Please, inform a prefix to your store.', 'wpecomm-mercadopago-module' ) . ' ' .
+				__( 'If you use your Mercado Pago account on multiple stores you should make sure that this prefix is unique as Mercado Pago will not allow orders with same identificators.', 'wpecomm-mercadopago-module' ) .
+			'</p>
+		</td>
+	</tr>
+	<tr>
+		<td>' . __( 'URL Approved Payment', 'wpecomm-mercadopago-module' ) . '</td>
+		<td>
+			<input name="mercadopago_ticket_url_sucess" type="text" value="' . $url_sucess . '"/>
+			<p class="description">' .
+				__( 'This is the URL where the customer is redirected if his payment is approved.', 'wpecomm-mercadopago-module' ) .
+			'</p>
+		</td>
+	</tr>
+	<tr>
+		<td>' . __( 'URL Pending Payment', 'wpecomm-mercadopago-module' ) . '</td>
+		<td>
+			<input name="mercadopago_ticket_url_pending" type="text" value="' . $url_pending . '"/>
+			<p class="description">' .
+				__( 'This is the URL where the customer is redirected if his payment is in process.', 'wpecomm-mercadopago-module' ) .
+			'</p>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><h3><strong>' .
+			__( 'Payment Options', 'wpecomm-mercadopago-module' ) .
+		'</strong></h3></td>
+	</tr>
+	<tr>
+		<td>' . __( 'Currency Conversion', 'wpecomm-mercadopago-module' ) . '</td>
+		<td>
+			<select name="mercadopago_ticket_currencyconversion" id="currencyconversion">' .
+				WPeComm_MercadoPago_Module::currency_conversion(
+					'mercadopago_ticket_currencyconversion'
+				) .
+			'</select>
+			<p class="description">' .
+				__( 'If the used currency in WPeCommerce is different or not supported by Mercado Pago, convert values of your transactions using Mercado Pago currency ratio', 'wpecomm-mercadopago-module' ) .
+				'<br >' . __( sprintf( '%s', $currency_message ) ) .
+			'</p>
+		</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><h3><strong>' .
+			__( 'Test and Debug Options', 'wpecomm-mercadopago-module' ) .
+		'</strong></h3></td>
+	</tr>
+	<tr>
+		<td>' . __( 'Debug mode', 'wpecomm-mercadopago-module' ) . '</td>
+		<td>
+			<select name="mercadopago_ticket_debug">' .
+				WPeComm_MercadoPago_Module::debugs( 'mercadopago_ticket_debug' ) .
+			'</select>
+			<p class="description">' .
+				__( 'Enable to display log messages in browser console (not recommended in production environment)', 'wpecomm-mercadopago-module' ) .
+			'</p>
+		</td>
+	</tr>';
+
 	return $output;
-}
-
-function getCurrencyId_ticket($site_id) {
-	switch ($site_id) {
-		case 'MLA': return 'ARS';
-		case 'MLB': return 'BRL';
-		case 'MCO': return 'COP';
-		case 'MLC': return 'CLP';
-		case 'MLM': return 'MXN';
-		case 'MLV': return 'VEF';
-		case 'MPE': return 'PEN';
-		default: return '';
-	}
-}
-
-function getCountryName_ticket($site_id) {
-	$country = $site_id;
-	switch ($site_id) {
-		case 'MLA': return __( 'Argentine', 'wpecomm-mercadopago-module' );
-		case 'MLB': return __( 'Brazil', 'wpecomm-mercadopago-module' );
-		case 'MCO': return __( 'Colombia', 'wpecomm-mercadopago-module' );
-		case 'MLC': return __( 'Chile', 'wpecomm-mercadopago-module' );
-		case 'MLM': return __( 'Mexico', 'wpecomm-mercadopago-module' );
-		case 'MLV': return __( 'Venezuela', 'wpecomm-mercadopago-module' );
-		case 'MPE': return __( 'Peru', 'wpecomm-mercadopago-module' );
-	}
 
 }
-
-// Return boolean indicating if currency is supported.
-function isSupportedCurrency_ticket( $site_id ) {
-	$store_currency_code = WPSC_Countries::get_currency_code(absint(get_option('currency_type')));
-	return $store_currency_code == getCurrencyId_ticket($site_id);
-}
-
-// Fix to URL Problem : #038; replaces & and breaks the navigation
-function workaroundAmperSandBug_ticket( $link ) {
-	return str_replace('&#038;', '&', $link);
-}
-
-function getImagePath_ticket( $image_name ) {
-	return plugins_url( 'wpsc-merchants/mercadopago-images/' . $image_name, plugin_dir_path( __FILE__ ) );
-}
-
-/*===============================================================================
-	CHECKOUT FORM AND SETTINGS PAGE
-================================================================================*/
 
 /**
- * Saving of Mercado Pago Ticket Checkout Settings
+ * Saving of Mercado Pago Ticket Checkout Settings.
  * @access public
  *
- * @since 4.2.0
+ * @since 4.1.0
  */
 function submit_mercadopago_ticket() {
-	if (isset($_POST['mercadopago_ticket_accesstoken'])) {
-		update_option('mercadopago_ticket_accesstoken', trim($_POST['mercadopago_ticket_accesstoken']));
+
+	if ( isset( $_POST['mercadopago_ticket_accesstoken'] ) ) {
+		update_option(
+			'mercadopago_ticket_accesstoken',
+			trim( $_POST['mercadopago_ticket_accesstoken']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_siteid'])) {
-		update_option('mercadopago_ticket_siteid', trim($_POST['mercadopago_ticket_siteid']));
+	if ( isset( $_POST['mercadopago_ticket_siteid'] ) ) {
+		update_option(
+			'mercadopago_ticket_siteid',
+			trim( $_POST['mercadopago_ticket_siteid']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_checkoutmessage1'])) {
-		update_option('mercadopago_ticket_checkoutmessage1', trim($_POST['mercadopago_ticket_checkoutmessage1']));
+	if ( isset( $_POST['mercadopago_ticket_checkoutmessage1'] ) ) {
+		update_option(
+			'mercadopago_ticket_checkoutmessage1',
+			trim( $_POST['mercadopago_ticket_checkoutmessage1']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_istestuser'])) {
-		update_option('mercadopago_ticket_istestuser', trim($_POST['mercadopago_ticket_istestuser']));
+	if ( isset( $_POST['mercadopago_ticket_istestuser'] ) ) {
+		update_option(
+			'mercadopago_ticket_istestuser',
+			trim( $_POST['mercadopago_ticket_istestuser']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_currencyratio'])) {
-		update_option('mercadopago_ticket_currencyratio', trim($_POST['mercadopago_ticket_currencyratio']));
+	if ( isset( $_POST['mercadopago_ticket_currencyratio'] ) ) {
+		update_option(
+			'mercadopago_ticket_currencyratio',
+			trim( $_POST['mercadopago_ticket_currencyratio']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_payment_methods'])) {
-		update_option('mercadopago_ticket_payment_methods', trim($_POST['mercadopago_ticket_payment_methods']));
+	if ( isset( $_POST['mercadopago_ticket_payment_methods'] ) ) {
+		update_option(
+			'mercadopago_ticket_payment_methods',
+			trim( $_POST['mercadopago_ticket_payment_methods']
+		) );
 	}
-	/*if (isset($_POST['mercadopago_ticket_coupom'])) {
-		update_option('mercadopago_ticket_coupom', trim($_POST['mercadopago_ticket_coupom']));
+	/*if ( isset( $_POST['mercadopago_ticket_coupom'] ) ) {
+		update_option(
+			'mercadopago_ticket_coupom',
+			trim( $_POST['mercadopago_ticket_coupom']
+		) );
 	}*/
-	if (isset($_POST['mercadopago_ticket_category'])) {
-		update_option('mercadopago_ticket_category', trim($_POST['mercadopago_ticket_category']));
+	if ( isset( $_POST['mercadopago_ticket_category'] ) ) {
+		update_option(
+			'mercadopago_ticket_category',
+			trim( $_POST['mercadopago_ticket_category']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_invoiceprefix'])) {
-		update_option('mercadopago_ticket_invoiceprefix', trim($_POST['mercadopago_ticket_invoiceprefix']));
+	if ( isset( $_POST['mercadopago_ticket_invoiceprefix'] ) ) {
+		update_option(
+			'mercadopago_ticket_invoiceprefix',
+			trim( $_POST['mercadopago_ticket_invoiceprefix']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_currencyconversion'])) {
-		update_option('mercadopago_ticket_currencyconversion', trim($_POST['mercadopago_ticket_currencyconversion']));
+	if ( isset( $_POST['mercadopago_ticket_currencyconversion'] ) ) {
+		update_option(
+			'mercadopago_ticket_currencyconversion',
+			trim( $_POST['mercadopago_ticket_currencyconversion']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_url_sucess'])) {
-		update_option('mercadopago_ticket_url_sucess', trim($_POST['mercadopago_ticket_url_sucess']));
+	if ( isset( $_POST['mercadopago_ticket_url_sucess'] ) ) {
+		update_option(
+			'mercadopago_ticket_url_sucess',
+			trim( $_POST['mercadopago_ticket_url_sucess']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_url_pending'])) {
-		update_option('mercadopago_ticket_url_pending', trim($_POST['mercadopago_ticket_url_pending']));
+	if ( isset( $_POST['mercadopago_ticket_url_pending'] ) ) {
+		update_option(
+			'mercadopago_ticket_url_pending',
+			trim( $_POST['mercadopago_ticket_url_pending']
+		) );
 	}
-	if (isset($_POST['mercadopago_ticket_debug'])) {
-		update_option('mercadopago_ticket_debug', trim($_POST['mercadopago_ticket_debug']));
+	if ( isset( $_POST['mercadopago_ticket_debug'] ) ) {
+		update_option(
+			'mercadopago_ticket_debug',
+			trim( $_POST['mercadopago_ticket_debug']
+		) );
 	}
+
 	return true;
+
 }
 
-if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_gateway_options' ) ) ) {
+if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array) get_option( 'custom_gateway_options' ) ) ) {
 
-	$mp = new MP( // Create MP object and set sandbox mode to false
-		get_option('mercadopago_ticket_accesstoken')
+	// Create MP object and set sandbox mode to false.
+	$mp = new MP(
+		WPeComm_MercadoPago_Module::get_module_version(),
+		get_option( 'mercadopago_ticket_accesstoken' )
 	);
-	$isTestUser = get_option('mercadopago_ticket_istestuser');
 	$mp->sandbox_mode( false );
 
-	// Get needed variables
-	$site_id = get_option('mercadopago_custom_siteid', 'MLA');
-	if ( empty($site_id) || $site_id == null )
+	// Get the order amount.
+	$amount = wpsc_cart_total( false );
+
+	// Site id.
+	$site_id = get_option( 'mercadopago_custom_siteid', 'MLA' );
+	if ( empty( $site_id ) || $site_id == null ) {
 		$site_id = 'MLA';
-	$amount = wpsc_cart_total(false);
-	$account_currency = getCurrencyId_ticket( $site_id );
-	$currency_ratio = get_option('mercadopago_ticket_currencyratio');
-	$wpecommerce_currency = WPSC_Countries::get_currency_code(absint(get_option('currency_type')));
+	}
+	$country_configs = WPeComm_MercadoPago_Module::get_country_config( $site_id );
 
-	// Build payment banner url
-	$banners_mercadopago_standard = array(
-		"MLA" => 'MLA/standard.jpg',
-		"MLB" => 'MLB/standard.jpg',
-		"MCO" => 'MCO/standard.jpg',
-		"MLC" => 'MLC/standard.gif',
-		"MPE" => 'MPE/standard.png',
-		"MLV" => 'MLV/standard.jpg',
-		"MLM" => 'MLM/standard.jpg'
-	);
+	// Payment methods.
+	$payment_methods = json_decode(stripslashes(
+		preg_replace( '/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
+			get_option( 'mercadopago_ticket_payment_methods' )
+		) )
+	), true );
+	if ( empty( $payment_methods ) || $payment_methods == null ) {
+		$payment_methods = array();
+	}
 
-	// labels
+	// Labels.
 	$form_labels = json_decode(stripslashes(
-		preg_replace('/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
-			get_option('mercadopago_ticket_checkoutmessage1', '')
-		))
-	), true);
+		preg_replace( '/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
+			get_option( 'mercadopago_ticket_checkoutmessage1', '' )
+		) )
+	), true );
 	if ( $form_labels == '' ) {
 		$form_labels = array(
-			"form" => array(
-				"issuer_selection" => __( 'Please, select the ticket issuer of your preference.', 'wpecomm-mercadopago-module' ),
-				"payment_instructions" => __( 'Click [Place order] button. The ticket will be generated and you will be redirected to print it.', 'wpecomm-mercadopago-module' ),
-				"ticket_note" => __( 'Important - The order will be confirmed only after the payment approval.', 'wpecomm-mercadopago-module' ),
-				"ticket_resume" => __( 'Please, pay the ticket to get your order approved.', 'wpecomm-mercadopago-module'),
-				"print_ticket" => __( 'Print the Ticket', 'wpecomm-mercadopago-module' ),
-				"payment_approved" => __( "Payment <strong>approved</strong>.", "wpecomm-mercadopago-module" ),
-				"payment_in_process" => __( "Your payment under <strong>review</strong>.", "wpecomm-mercadopago-module" ),
-				"payment_rejected" => __( "Your payment was <strong>refused</strong>.", "wpecomm-mercadopago-module" ),
-				"payment_pending" => __( "Your payment is <strong>pending</strong>.", "wpecomm-mercadopago-module" ),
-				"payment_cancelled" => __( "Your payment has been <strong>canceled</strong>.", "wpecomm-mercadopago-module" ),
-				"payment_in_mediation" => __( "Your payment is in <strong>mediation</strong>.", "wpecomm-mercadopago-module" ),
-				"payment_charged_back" => __( "Your payment has been <strong>refunded</strong>.", "wpecomm-mercadopago-module" ),
-				"return_and_try" => __( "Return and Try Again", "wpecomm-mercadopago-module" ),
-				"tax_fees" => __( "Tax fees applicable in store", "wpecomm-mercadopago-module" ),
-				"shipment" => __( "Shipping service used by store", "wpecomm-mercadopago-module" ),
-				"payment_converted" => __( "Payment with converted currency", "wpecomm-mercadopago-module" ),
-				"to" => __( "to", "wpecomm-mercadopago-module" ),
-				"label_other_bank" => __( "Other Bank", "wpecomm-mercadopago-module" ),
-				"label_choose" => __( "Choose", "wpecomm-mercadopago-module" ),
+			'form' => array(
+				'issuer_selection' => __( 'Please, select the ticket issuer of your preference.', 'wpecomm-mercadopago-module' ),
+				'payment_instructions' => __( 'Click [Place order] button. The ticket will be generated and you will be redirected to print it.', 'wpecomm-mercadopago-module' ),
+				'ticket_note' => __( 'Important - The order will be confirmed only after the payment approval.', 'wpecomm-mercadopago-module' ),
+				'ticket_resume' => __( 'Please, pay the ticket to get your order approved.', 'wpecomm-mercadopago-module'),
+				'print_ticket' => __( 'Print the Ticket', 'wpecomm-mercadopago-module' ),
+				'payment_approved' => __( 'Payment <strong>approved</strong>.', 'wpecomm-mercadopago-module' ),
+				'payment_in_process' => __( 'Your payment under <strong>review</strong>.', 'wpecomm-mercadopago-module' ),
+				'payment_rejected' => __( 'Your payment was <strong>refused</strong>.', 'wpecomm-mercadopago-module' ),
+				'payment_pending' => __( 'Your payment is <strong>pending</strong>.', 'wpecomm-mercadopago-module' ),
+				'payment_cancelled' => __( 'Your payment has been <strong>canceled</strong>.', 'wpecomm-mercadopago-module' ),
+				'payment_in_mediation' => __( 'Your payment is in <strong>mediation</strong>.', 'wpecomm-mercadopago-module' ),
+				'payment_charged_back' => __( 'Your payment has been <strong>refunded</strong>.', 'wpecomm-mercadopago-module' ),
+				'return_and_try' => __( 'Return and Try Again', 'wpecomm-mercadopago-module' ),
+				'tax_fees' => __( 'Tax fees applicable in store', 'wpecomm-mercadopago-module' ),
+				'shipment' => __( 'Shipping service used by store', 'wpecomm-mercadopago-module' ),
+				'payment_converted' => __( 'Payment with converted currency', 'wpecomm-mercadopago-module' ),
+				'to' => __( 'to', 'wpecomm-mercadopago-module' ),
+				'label_other_bank' => __( 'Other Bank', 'wpecomm-mercadopago-module' ),
+				'label_choose' => __( 'Choose', 'wpecomm-mercadopago-module' ),
 			)
 		);
-	}
-	// payment methods
-	$payment_methods = json_decode(stripslashes(
-		preg_replace('/u([\da-fA-F]{4})/', '&#x\1;', stripslashes(
-			get_option('mercadopago_ticket_payment_methods')
-		))
-	), true);
-	if (empty($payment_methods) || $payment_methods == null) {
-		$payment_methods = array();
 	}
 
 	// header
@@ -901,53 +916,56 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_ga
 		'<div width="100%" style="margin:0px; padding:16px 36px 16px 36px; background:white;
 			border-style:solid; border-color:#DDDDDD" border-radius:1.0px;">
 			<img class="logo" src="' .
-				plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) . '"
-				" width="156" height="40" />' . ( count( $payment_methods ) > 1 ? '<img class="logo" src="' .
-				plugins_url( 'wpsc-merchants/mercadopago-images/boleto.png', plugin_dir_path( __FILE__ ) ) . '
-				" width="90" height="40" style="float:right;"/>' : getPaymentMethodsImages( $payment_methods ) ) .
+				plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) .
+				'" width="156" height="40" />' . ( count( $payment_methods ) > 1 ? '<img class="logo" src="' .
+				plugins_url( 'wpsc-merchants/mercadopago-images/boleto.png', plugin_dir_path( __FILE__ ) ) .
+				'" width="90" height="40" style="float:right;"/>' : getPaymentMethodsImages( $payment_methods ) ) .
 		'</div>';
+
 	// payment method
 	$mercadopago_form =
 		'<fieldset style="background:white;">
 			<div style="padding:0px 36px 0px 36px;">
-
 				<p>' .
-					( count( $payment_methods ) > 1 ? $form_labels[ 'form' ][ 'issuer_selection' ] . ' ' : '' ) .
+					( count( $payment_methods ) > 1 ?
+						$form_labels[ 'form' ][ 'issuer_selection' ] . ' ' : ''
+					) .
 					$form_labels[ 'form' ][ 'payment_instructions' ] . '<br />' .
-					$form_labels[ 'form' ][ 'ticket_note' ] . ( $currency_ratio > 0 ?
-						" (" . $form_labels['form']['payment_converted'] . " " . $wpecommerce_currency . " " .
-						$form_labels['form']['to'] . " " . $account_currency . ")" : '' ) .
-				'</p>' .
-
-				drawTicketOptions( $payment_methods ) .
-
+					$form_labels[ 'form' ][ 'ticket_note' ] . (
+						get_option( 'mercadopago_ticket_currencyratio' ) > 0 ?
+							' (' . $form_labels['form']['payment_converted'] . ' ' .
+							WPSC_Countries::get_currency_code( absint(
+								get_option( 'currency_type' )
+							) ) . ' ' . $form_labels['form']['to'] . ' ' .
+							$country_configs['currency'] . ')' : '' ) .
+				'</p>' . draw_ticket_options( $payment_methods ) .
 				'<div class="mp-box-inputs mp-line">
 					<div class="mp-box-inputs mp-col-25">
 						<div id="mp-box-loading">
 						</div>
 					</div>
 				</div>
-
 				<div class="mp-box-inputs mp-col-100" id="mercadopago-utilities">
 					<input type="hidden" id="site_id" name="mercadopago_ticket[site_id]"/>
 					<input type="hidden" id="amountTicket" value="' . $amount . '" name="mercadopago_ticket[amount]"/>
 				</div>
-
 			</div>
 		</fieldset>';
 
-	$page_js = '
-		<script src="' . plugins_url( 'wpsc-merchants/mercadopago-lib/MPv1Ticket.js?no_cache=' .
+	// javascript
+	$page_js =
+		'<script src="' . plugins_url( 'wpsc-merchants/mercadopago-lib/MPv1Ticket.js?no_cache=' .
 			time(), plugin_dir_path( __FILE__ ) ) . '"></script>
 		<script type="text/javascript">
 			var mercadopago_site_id = "' . $site_id . '";
-			MPv1Ticket.paths.loading = "' . getImagePath_ticket('loading.gif') . '";
+			MPv1Ticket.paths.loading = "' . WPeComm_MercadoPago_Module::get_image_path( 'loading.gif' ) . '";
 			MPv1Ticket.getAmount = function() {
 				return document.querySelector(MPv1Ticket.selectors.amount).value;
 			}
 			MPv1Ticket.Initialize(mercadopago_site_id);
 		</script>';
 
+	// header
 	$page_header =
 		'<head>
 			<link rel="stylesheet" id="twentysixteen-style-css"
@@ -959,8 +977,8 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_ga
 				time(), plugin_dir_path( __FILE__ ) ) . '"></script>
 		</head>';
 
-	$output = '
-		<tr>
+	$output =
+		'<tr>
 			<td>' .
 				$page_header .
 				'<div style="width: 600px;">' . $payment_header . '</div>' .
@@ -968,16 +986,23 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_ga
 				$page_js .
 			'</td>
 		</tr>';
+
 	$gateway_checkout_form_fields[$nzshpcrt_gateways[$num]['internalname']] = $output;
+
 }
 
-/*===============================================================================
-	FUNCTIONS TO GENERATE VIEWS
-================================================================================*/
+/*
+ * ========================================================================
+ * FUNCTIONS TO GENERATE VIEWS (SERVER SIDE)
+ * ========================================================================
+ */
 
-function drawTicketOptions( $payment_methods ) {
-	$output = "";
+function draw_ticket_options( $payment_methods ) {
+
+	$output = '';
+
 	if ( count( $payment_methods ) > 1 ) {
+
 		$atFirst = true;
 		$output .= '<div class="mp-box-inputs mp-col-100">';
 		foreach ( $payment_methods as $payment ) {
@@ -985,128 +1010,50 @@ function drawTicketOptions( $payment_methods ) {
 				'<div class="mp-box-inputs mp-line">
 					<div id="paymentMethodId" class="mp-box-inputs mp-col-10">
 						<input type="radio" class="input-radio" name="mercadopago_ticket[paymentMethodId]"
-							style="height:16px; width:16px;" value="' . $payment[ "id" ] . '" ' .
+							style="height:16px; width:16px;" value="' . $payment[ 'id' ] . '" ' .
 							( $atFirst ? 'checked="checked"' : '' ) . ' />
 					</div>
 					<div class="mp-box-inputs mp-col-45">
 						<label>
-							<img src="' . $payment[ "thumbnail" ] . '" alt="' . $payment[ 'name' ] . '" />
-							&nbsp;(' . $payment[ "name" ] . ')
+							<img src="' . $payment[ 'thumbnail' ] . '" alt="' . $payment[ 'name' ] . '" />
+							&nbsp;(' . $payment[ 'name' ] . ')
 						</label>
 					</div>
 				</div>';
 			$atFirst = false;
 		}
 		$output .= '</div>';
+
 	} else {
-		$output .=
-			'<div class="mp-box-inputs mp-col-100" style="display:none;">
-				<select id="paymentMethodId" name="mercadopago_ticket[paymentMethodId]">';
+
+		$output .= '<div class="mp-box-inputs mp-col-100" style="display:none;">
+			<select id="paymentMethodId" name="mercadopago_ticket[paymentMethodId]">';
 		foreach ( $payment_methods as $payment ) {
 			$output .=
-				'<option value="' . $payment[ "id" ] . '"style="padding: 8px;
+				'<option value="' . $payment[ 'id' ] . '"style="padding: 8px;
 					background: url( "https://img.mlstatic.com/org-img/MP3/API/logos/bapropagos.gif" );
-					98% 50% no-repeat;"> ' . $payment[ "name" ] . '</option>';
+					98% 50% no-repeat;"> ' . $payment[ 'name' ] . '</option>';
 		}
 		$output .= '</select></div>';
+
 	}
+
 	return $output;
+
 }
 
 function getPaymentMethodsImages( $payment_methods ) {
-	$html = "";
+
+	$html = '';
+
 	foreach ( $payment_methods as $payment ) {
-		$html .= '<img class="logo" src="' . $payment[ 'thumbnail' ] . '" width="90" height="40" style="float:right;"/>';
+		$html .= '<img class="logo" src="' . $payment[ 'thumbnail' ] .
+			'" width="90" height="40" style="float:right;"/>';
 		break;
 	}
+
 	return $html;
-}
 
-function category_ticket() {
-	$category = get_option('mercadopago_ticket_category');
-	$category = $category === false || is_null($category) ? "others" : $category;
-	// category marketplace
-	$list_category = MPRestClient::get( array( "uri" => "/item_categories" ) );
-	$list_category = $list_category["response"];
-	$select_category = '<select name="mercadopago_ticket_category" id="category" style="max-width:600px;>';
-	foreach ($list_category as $category_arr) :
-		$selected = "";
-		if ($category_arr['id'] == $category) :
-			$selected = 'selected="selected"';
-		endif;
-		$select_category .=
-			'<option value="' . $category_arr['id'] .
-			'" id="type-checkout-' . $category_arr['description'] .
-			'" ' . $selected . ' >' . $category_arr['description'] .
-			'</option>';
-	endforeach;
-	$select_category .= "</select>";
-	return $select_category;
-}
-
-/*function coupom_ticket() {
-	$coupom = get_option('mercadopago_ticket_coupom');
-	$coupom = $coupom === false || is_null($coupom) ? "inactive" : $coupom;
-	$coupom_options = array(
-		array("value" => "active", "text" => "Active"),
-		array("value" => "inactive", "text" => "Inactive")
-	);
-	$select_coupom = '<select name="mercadopago_ticket_coupom" id="coupom">';
-	foreach ($coupom_options as $op_coupom) :
-		$selected = "";
-		if ($op_coupom['value'] == $coupom) :
-		$selected = 'selected="selected"';
-		endif;
-		$select_coupom .=
-			'<option value="' . $op_coupom['value'] .
-			'" id="coupom-' . $op_coupom['value'] .
-			'" ' . $selected . '>' . __($op_coupom['text'], "wpecomm-mercadopago-module") .
-			'</option>';
-	endforeach;
-	$select_coupom .= "</select>";
-	return $select_coupom;
-}*/
-
-function currency_conversion_ticket() {
-	$currencyconversion = get_option('mercadopago_ticket_currencyconversion');
-	$currencyconversion = $currencyconversion === false || is_null($currencyconversion) ? "inactive" : $currencyconversion;
-	$currencyconversion_options = array(
-		array("value" => "active", "text" => "Active"),
-		array("value" => "inactive", "text" => "Inactive")
-	);
-	$select_currencyconversion = '<select name="mercadopago_ticket_currencyconversion" id="currencyconversion">';
-	foreach ($currencyconversion_options as $op_currencyconversion) :
-		$selected = "";
-		if ($op_currencyconversion['value'] == $currencyconversion) :
-		$selected = 'selected="selected"';
-		endif;
-		$select_currencyconversion .=
-			'<option value="' . $op_currencyconversion['value'] .
-			'" id="currencyconversion-' . $op_currencyconversion['value'] .
-			'" ' . $selected . '>' . __($op_currencyconversion['text'], "wpecomm-mercadopago-module") .
-			'</option>';
-	endforeach;
-	$select_currencyconversion .= "</select>";
-	return $select_currencyconversion;
-}
-
-function debugs_ticket() {
-	if (get_option('mercadopago_ticket_debug') == null || get_option('mercadopago_ticket_debug') == '') {
-		$mercadopago_ticket_debug = 'No';
-	} else {
-		$mercadopago_ticket_debug = get_option('mercadopago_ticket_debug');
-	}
-	$debugs = array('No','Yes');
-	$showdebugs = '<select name="mercadopago_ticket_debug">';
-	foreach ($debugs as  $debug ) :
-		if ($debug == $mercadopago_ticket_debug) {
-			$showdebugs .= '<option value="' . $debug . '" selected="selected">' . __($debug, "wpecomm-mercadopago-module") . '</option>';
-		} else {
-			$showdebugs .= '<option value="' . $debug . '">' . __($debug, "wpecomm-mercadopago-module") . '</option>';
-		}
-	endforeach;
-	$showdebugs .= '</select>';
-	return $showdebugs;
 }
 
 ?>

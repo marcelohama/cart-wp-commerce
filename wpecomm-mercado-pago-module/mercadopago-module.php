@@ -452,9 +452,9 @@ if ( ! class_exists( 'WPeComm_MercadoPago_Module' ) ) :
 		 * Description: This open/save the currency conversion option selector and build its html.
 		 * @return the html, as a string.
 		 */
-		public static function currency_conversion( $used_currency ) {
+		public static function currency_conversion( $saved_source ) {
 
-			$currencyconversion = get_option( $used_currency );
+			$currencyconversion = get_option( $saved_source );
 			$currencyconversion =
 				$currencyconversion === false || is_null( $currencyconversion ) ?
 				'inactive' : $currencyconversion;

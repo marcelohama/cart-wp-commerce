@@ -872,8 +872,8 @@ function form_mercadopago_custom() {
 	</tr>
 	<tr>
 		<td>' . __( 'Store Category', 'wpecomm-mercadopago-module' ) . '</td>
-		<td>' .
-			'<select name="mercadopago_custom_category" id="category" style="max-width:600px;>' .
+		<td>
+			<select name="mercadopago_custom_category" id="category" style="max-width:600px;>' .
 				WPeComm_MercadoPago_Module::get_categories( 'mercadopago_custom_category' ) .
 			'</select>
 			<p class="description">' .
@@ -920,8 +920,8 @@ function form_mercadopago_custom() {
 	</tr>
 	<tr>
 		<td>' . __( 'Currency Conversion', 'wpecomm-mercadopago-module' ) . '</td>
-		<td>' .
-			'<select name="mercadopago_custom_currencyconversion" id="currencyconversion">' .
+		<td>
+			<select name="mercadopago_custom_currencyconversion" id="currencyconversion">' .
 				WPeComm_MercadoPago_Module::currency_conversion(
 					'mercadopago_custom_currencyconversion'
 				) .
@@ -951,8 +951,8 @@ function form_mercadopago_custom() {
 	</tr>
 	<tr>
 		<td>' . __( 'Debug mode', 'wpecomm-mercadopago-module' ) . '</td>
-		<td>' .
-			'<select name="mercadopago_custom_debug">' .
+		<td>
+			<select name="mercadopago_custom_debug">' .
 				WPeComm_MercadoPago_Module::debugs( 'mercadopago_custom_debug' ) .
 			'</select>
 			<p class="description">' .
@@ -976,7 +976,7 @@ function submit_mercadopago_custom() {
 	if ( isset( $_POST['mercadopago_custom_publickey'] ) ) {
 		update_option(
 			'mercadopago_custom_publickey',
-			trim($_POST['mercadopago_custom_publickey']
+			trim( $_POST['mercadopago_custom_publickey']
 		) );
 	}
 	if ( isset( $_POST['mercadopago_custom_accesstoken'] ) ) {
@@ -1115,7 +1115,6 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array) get_option( 'custom_g
 			get_option( 'mercadopago_custom_checkoutmessage1', '' )
 		) )
 	), true );
-
 	if ( $form_labels == '' ) {
 		$form_labels = array(
 			'form' => array(
@@ -1187,13 +1186,14 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array) get_option( 'custom_g
 	$payment_header =
 		'<div width="100%" style="margin:0px; padding:16px 36px 16px 36px; background:white;
 			border-style:solid; border-color:#DDDDDD" border-radius:1.0px;">
-			<img class="logo" src=' .
-				plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) . '
-				" width="156" height="40" />
+			<img class="logo" src="' .
+				plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) .
+				'" width="156" height="40" />
 			<img alt="Mercado Pago" title="Mercado Pago" class="mp-creditcard-banner" src="' .
 				$country_configs['checkout_banner_custom'] .
 				'" width="312" height="40" />
 		</div>';
+
 	// payment method
 	$mercadopago_form =
 		'<fieldset style="background:white;">
@@ -1341,8 +1341,9 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array) get_option( 'custom_g
 
 		</fieldset>';
 
-	$page_js = '
-		<script src="https://secure.mlstatic.com/sdk/javascript/v1/mercadopago.js"></script>
+	// javascript
+	$page_js =
+		'<script src="https://secure.mlstatic.com/sdk/javascript/v1/mercadopago.js"></script>
 		<script src="' . plugins_url( 'wpsc-merchants/mercadopago-lib/MPv1.js?no_cache=' .
 			time(), plugin_dir_path( __FILE__ ) ) . '"></script>
 		<script type="text/javascript">
@@ -1384,6 +1385,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array) get_option( 'custom_g
 			MPv1.Initialize(mercadopago_site_id, mercadopago_public_key);
 		</script>';
 
+	// header
 	$page_header =
 		'<head>
 			<link rel="stylesheet" id="twentysixteen-style-css"
