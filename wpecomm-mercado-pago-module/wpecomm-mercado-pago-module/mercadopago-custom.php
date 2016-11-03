@@ -1202,7 +1202,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array) get_option( 'custom_g
 					<label for="paymentMethodIdSelector">' . $form_labels['form']['payment_method'] . ' <em>*</em></label>
 					<select id="paymentMethodSelector" name="mercadopago_custom[paymentMethodSelector]" data-checkout="cardId">
 						<optgroup label=' . $form_labels['form']['your_card'] . ' id="payment-methods-for-customer-and-cards">' .
-							WPeComm_MercadoPago_Module::get_image_path( $customer_cards, $form_labels ) .
+							payment_methods_customer_cards( $customer_cards, $form_labels ) .
 						'</optgroup>
 						<optgroup label="' . $form_labels['form']['other_cards'] . '" id="payment-methods-list-other-cards">
 							<option value="-1">' . $form_labels['form']['other_card'] . '</option>
@@ -1456,13 +1456,14 @@ function binary() {
 		array( 'value' => 'active', 'text' => 'Active' ),
 		array( 'value' => 'inactive', 'text' => 'Inactive' )
 	);
+	$select_binary = '';
 
 	foreach ( $binary_options as $op_binary ) :
 		$selected = '';
 		if ( $op_binary['value'] == $binary ) :
 			$selected = "selected='selected'";
 		endif;
-		$select_binary .=
+		$select_binary =
 			'<option value="' . $op_binary['value'] .
 			'" id="binary-' . $op_binary['value'] .
 			'" ' . $selected . '>' . __( $op_binary['text'], 'wpecomm-mercadopago-module' ) .

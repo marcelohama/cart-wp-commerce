@@ -462,6 +462,7 @@ if ( ! class_exists( 'WPeComm_MercadoPago_Module' ) ) :
 				array( 'value' => 'active', 'text' => 'Active' ),
 				array( 'value' => 'inactive', 'text' => 'Inactive' )
 			);
+			$select_currencyconversion = '';
 
 			foreach ( $currencyconversion_options as $op_currencyconversion ) :
 				$selected = '';
@@ -487,6 +488,7 @@ if ( ! class_exists( 'WPeComm_MercadoPago_Module' ) ) :
 				array( 'value' => 'active', 'text' => 'Active' ),
 				array( 'value' => 'inactive', 'text' => 'Inactive' )
 			);
+			$select_binary = '';
 
 			foreach ( $coupom_options as $op_coupom ) :
 				$selected = '';
@@ -512,6 +514,7 @@ if ( ! class_exists( 'WPeComm_MercadoPago_Module' ) ) :
 				array( 'value' => 'active', 'text' => 'Active' ),
 				array( 'value' => 'inactive', 'text' => 'Inactive' )
 			);
+			$select_sandbox = '';
 
 			foreach ( $sandbox_options as $op_sandbox ) :
 				$selected = '';
@@ -537,6 +540,7 @@ if ( ! class_exists( 'WPeComm_MercadoPago_Module' ) ) :
 				array( 'value' => 'active', 'text' => 'Active' ),
 				array( 'value' => 'inactive', 'text' => 'Inactive' )
 			);
+			$select_debug = '';
 
 			foreach ( $debug_options as $op_debug ) :
 				$selected = '';
