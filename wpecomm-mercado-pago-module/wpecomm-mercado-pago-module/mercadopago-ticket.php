@@ -919,7 +919,7 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array) get_option( 'custom_g
 				plugins_url( 'wpsc-merchants/mercadopago-images/mplogo.png', plugin_dir_path( __FILE__ ) ) .
 				'" width="156" height="40" />' . ( count( $payment_methods ) > 1 ? '<img class="logo" src="' .
 				plugins_url( 'wpsc-merchants/mercadopago-images/boleto.png', plugin_dir_path( __FILE__ ) ) .
-				'" width="90" height="40" style="float:right;"/>' : getPaymentMethodsImages( $payment_methods ) ) .
+				'" width="90" height="40" style="float:right;"/>' : get_payment_methods_images( $payment_methods ) ) .
 		'</div>';
 
 	// payment method
@@ -1015,7 +1015,7 @@ function draw_ticket_options( $payment_methods ) {
 					</div>
 					<div class="mp-box-inputs mp-col-45">
 						<label>
-							<img src="' . $payment[ 'thumbnail' ] . '" alt="' . $payment[ 'name' ] . '" />
+							<img src="' . $payment[ 'secure_thumbnail' ] . '" alt="' . $payment[ 'name' ] . '" />
 							&nbsp;(' . $payment[ 'name' ] . ')
 						</label>
 					</div>
@@ -1042,12 +1042,12 @@ function draw_ticket_options( $payment_methods ) {
 
 }
 
-function getPaymentMethodsImages( $payment_methods ) {
+function get_payment_methods_images( $payment_methods ) {
 
 	$html = '';
 
 	foreach ( $payment_methods as $payment ) {
-		$html .= '<img class="logo" src="' . $payment[ 'thumbnail' ] .
+		$html .= '<img class="logo" src="' . $payment[ 'secure_thumbnail' ] .
 			'" width="90" height="40" style="float:right;"/>';
 		break;
 	}
