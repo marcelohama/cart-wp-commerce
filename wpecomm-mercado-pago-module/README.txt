@@ -4,9 +4,9 @@ Donate link: https://www.mercadopago.com.br/developers/
 Tags: ecommerce, mercadopago, wpecommerce
 Requires at least: WP-eCommerce 3.11.x
 Tested up to: WP-eCommerce 3.11.x
-Stable tag: 4.2.0
+Stable tag: 4.2.1
 License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 This is the oficial module of Mercado Pago for WP-eCommerce plugin.
 
@@ -39,7 +39,7 @@ You have two ways to install this module: from your WordPress Store, or by downl
 3. You should find the module read to be installed. Click install.
 
 = Manual Download =
-1. Get the module sources from a repository (<a href="https://github.com/mercadopago/cart-wp-commerce/archive/master.zip">Github</a> or <a href="https://downloads.wordpress.org/plugin/wpecomm-mercado-pago-module.4.2.0.zip">WordPress Plugin Directory</a>);
+1. Get the module sources from a repository (<a href="https://github.com/mercadopago/cart-wp-commerce/archive/master.zip">Github</a> or <a href="https://downloads.wordpress.org/plugin/wpecomm-mercado-pago-module.4.2.1.zip">WordPress Plugin Directory</a>);
 2. Unzip the folder and find "wpecomm-mercado-pago-module" directory;
 3. Copy "wpecomm-mercado-pago-module" directory to **[WordPressRootDirectory]/wp-content/plugins/** directory.
 
@@ -82,7 +82,7 @@ To confirm that your module is really installed, you can click in **Plugins** it
 
 = In this video, we show how you can install and configure from your WordPress store =
 
-yet to be uploaded...
+[youtube https://www.youtube.com/watch?v=_9eNDbNHOIc]
 
 == Frequently Asked Questions ==
 
@@ -104,20 +104,31 @@ Please, check our FAQ at: https://www.mercadopago.com.br/ajuda/
 
 == Changelog ==
 
+= v4.2.1 (04/11/2016) =
+* Features
+	- Two Card Payment Configuration. Merchants can configure this feature in back-office through settings page.
+* Improvements
+	- Removed some redundant notice messages;
+	- Improved algorithm to process settings page flow and checkout;
+	- Refactored code to meet WordPress coding standards.
+* Bug fixes
+	- Fixed a SSL issue related to ticket solution (the open locker) in gateway selection.
+
 = v4.2.0 (14/09/2016) =
 * Features
-	- Custom Checkout for LatAm. Offer a checkout fully customized to your brand experience with our simple-to-use payments API. Want to see how it works on-the-fly? Please check this video: <a href="TODO">Custom Checkout + Customer Cards</a>;
-	- Ticket for LatAm. Now, customer can pay orders with bank tickets. Want to see how it works on-the-fly? Please check this video: <a href="TODO">Tickets</a>.
+	- Customer Cards (One Click Payment). This feature allows customers to proceed to checkout with only one click. As Mercado Pago owns PCI standards, it can securely store credit card sensitive data and so register the customer card in the first time he uses it. Next time the customer comes back, he can use his card again, only by inserting its CVV code. Want to see how it works on-the-fly? Please check this video: <a href="https://www.youtube.com/watch?v=_KB8CtDei_4">Custom Checkout + Customer Cards</a>.
+	- Custom Checkout for LatAm. Offer a checkout fully customized to your brand experience with our simple-to-use payments API. Want to see how it works on-the-fly? Please check this video: <a href="https://www.youtube.com/watch?v=TQslFclOkhU">Custom Checkout + Customer Cards</a>;
+	- Ticket for LatAm. Now, customer can pay orders with bank tickets. Want to see how it works on-the-fly? Please check this video: <a href="https://www.youtube.com/watch?v=49_aJ9Tzabg">Tickets</a>.
 * Improvements
 	- Several little improvements for Basic Checkout.
-	
+
 = v4.1.0 (22/08/2016) =
 * Improvements
 	- Wrapped the module as an WordPress Plugin Directory.
-	
+
 = v4.0.0 (20/08/2016) =
 * Features
-	- LatAm Basic Checkout support. Great for merchants who want to get going quickly and easily. This is the basic payment integration with Mercado Pago. Want to see how it works on-the-fly? Please check this video: <a href="https://www.youtube.com/watch?v=DgOsX1eXjBU">Standard Checkout</a>
+	- LatAm Basic Checkout support. Great for merchants who want to get going quickly and easily. This is the basic payment integration with Mercado Pago. Want to see how it works on-the-fly? Please check this video: <a href="https://www.youtube.com/watch?v=TxFy65v1qIg">Basic Checkout</a>
 * Improvements
 	- Improved set of configurable fields and customizations. Title, description, category, and external reference customizations, integrations via iframe, modal, and redirection, with configurable auto-returning, max installments and payment method exclusion setup;
 	- Checkout flow with a more complete integration;
