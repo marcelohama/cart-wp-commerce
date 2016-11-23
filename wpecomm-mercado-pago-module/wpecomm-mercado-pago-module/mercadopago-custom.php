@@ -29,6 +29,8 @@ $nzshpcrt_gateways[$num] = array(
    'internalname' => 'WPSC_Merchant_MercadoPago_Custom'
 );
 
+add_action( 'wpsc_submit_gateway_options', array( 'WPSC_Merchant_MercadoPago_Custom', 'callback_submit_options_custom' ) );
+
 class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 
    var $name = '';
@@ -39,6 +41,22 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
       $this->purchase_id = $purchase_id;
       $this->name = __( 'Mercado Pago - Credit Card', 'wpecomm-mercadopago-module' );
       parent::__construct( $purchase_id, $is_receiving );
+   }
+
+   public static function callback_submit_options_custom() {
+      if ( ! empty( get_option( 'mercadopago_custom_accesstoken' ) ) ) {
+         $mp = new MP(
+            get_option( 'mercadopago_custom_accesstoken' )
+         );
+         $get_request = $mp->get( "/users/me?access_token=" . get_option( 'mercadopago_custom_accesstoken' ) );
+         // analytics
+         if ( isset( $get_request['response']['site_id'] ) ) {
+            $checkout_custom_credit_card = in_array( 'WPSC_Merchant_MercadoPago_Custom', get_option( 'custom_gateway_options' ) );
+            $infra_data = WPeComm_MercadoPago_Module::get_common_settings();
+            $infra_data['checkout_custom_credit_card'] = ( $checkout_custom_credit_card ? 'true' : 'false' );
+            $response = $mp->analytics_save_settings( $infra_data );
+         }
+      }
    }
 
    function submit() {
@@ -981,6 +999,18 @@ function submit_mercadopago_custom() {
    if (isset($_POST['mercadopago_custom_url_pending'])) {
       update_option('mercadopago_custom_url_pending', trim($_POST['mercadopago_custom_url_pending']));
    }
+   if ( isset( $_POST['mercadopago_custom_accesstoken'] ) ) {
+      $mp = new MP(
+         get_option( 'mercadopago_custom_accesstoken' )
+      );
+      $get_request = $mp->get( "/users/me?access_token=" . get_option( 'mercadopago_custom_accesstoken' ) );
+      // analytics
+      if ( isset( $get_request['response']['site_id'] ) ) {
+         $infra_data = WPeComm_MercadoPago_Module::get_common_settings();
+         $infra_data['checkout_custom_credit_card_coupon'] = 'false';
+         $response = $mp->analytics_save_settings( $infra_data );
+      }
+   }
    if (isset($_POST['mercadopago_custom_sandbox'])) {
       update_option('mercadopago_custom_sandbox', trim($_POST['mercadopago_custom_sandbox']));
    }
@@ -1485,5 +1515,9 @@ function debugs_custom() {
    $showdebugs .= '</select>';
    return $showdebugs;
 }
+
+/*===============================================================================
+   INSTANTIATIONS
+================================================================================*/
 
 ?>

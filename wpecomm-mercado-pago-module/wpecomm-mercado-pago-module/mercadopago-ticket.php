@@ -36,10 +36,27 @@ class WPSC_Merchant_MercadoPago_Ticket extends wpsc_merchant {
 
 	function __construct( $purchase_id = null, $is_receiving = false ) {
 		add_action( 'init', array( $this, 'load_plugin_textdomain_wpecomm' ) );
+      add_action( 'wpsc_submit_gateway_options', array( $this, 'callback_submit_options_ticket' ) );
 		$this->purchase_id = $purchase_id;
 		$this->name = __( 'Mercado Pago - Ticket', 'wpecomm-mercadopago-module' );
     	parent::__construct( $purchase_id, $is_receiving );
 	}
+
+   function callback_submit_options_ticket() {
+      if ( ! empty( get_option( 'mercadopago_ticket_accesstoken' ) ) ) {
+         $mp = new MP(
+            get_option( 'mercadopago_ticket_accesstoken' )
+         );
+         $get_request = $mp->get( "/users/me?access_token=" . get_option( 'mercadopago_ticket_accesstoken' ) );
+         // analytics
+         if ( isset( $get_request['response']['site_id'] ) ) {
+            $checkout_custom_ticket = in_array( 'WPSC_Merchant_MercadoPago_Ticket', get_option( 'custom_gateway_options' ) );
+            $infra_data = WPeComm_MercadoPago_Module::get_common_settings();
+            $infra_data['checkout_custom_ticket'] = ( $checkout_custom_ticket ? 'true' : 'false' );
+            $response = $mp->analytics_save_settings( $infra_data );
+         }
+      }
+   }
 
 	function submit() {
       global $wpdb, $wpsc_cart;
@@ -795,6 +812,18 @@ function submit_mercadopago_ticket() {
 	if (isset($_POST['mercadopago_ticket_url_pending'])) {
 		update_option('mercadopago_ticket_url_pending', trim($_POST['mercadopago_ticket_url_pending']));
 	}
+   if ( isset( $_POST['mercadopago_ticket_accesstoken'] ) ) {
+      $mp = new MP(
+         get_option( 'mercadopago_ticket_accesstoken' )
+      );
+      $get_request = $mp->get( "/users/me?access_token=" . get_option( 'mercadopago_ticket_accesstoken' ) );
+      // analytics
+      if ( isset( $get_request['response']['site_id'] ) ) {
+         $infra_data = WPeComm_MercadoPago_Module::get_common_settings();
+         $infra_data['checkout_custom_ticket_coupon'] = 'false';
+         $response = $mp->analytics_save_settings( $infra_data );
+      }
+   }
 	if (isset($_POST['mercadopago_ticket_debug'])) {
 		update_option('mercadopago_ticket_debug', trim($_POST['mercadopago_ticket_debug']));
 	}

@@ -39,6 +39,7 @@ class WPSC_Merchant_MercadoPago_Basic extends wpsc_merchant {
 
 	function __construct() {
 		add_action( 'init', array( $this, 'load_plugin_textdomain_wpecomm' ) );
+		add_action( 'wpsc_submit_gateway_options', array( $this, 'callback_submit_options_basic' ) );
 	}
 
 	// Multi-language plugin
@@ -46,9 +47,26 @@ class WPSC_Merchant_MercadoPago_Basic extends wpsc_merchant {
 		$locale = apply_filters( 'plugin_locale', get_locale(), 'wpecomm-mercadopago-module' );
 		load_textdomain(
 			'wpecomm-mercadopago-module',
-			trailingslashit(WP_LANG_DIR ) . 'mercadopago-languages/wpecomm-mercadopago-module-' . $locale . '.mo'
+			trailingslashit( WP_LANG_DIR ) . 'mercadopago-languages/wpecomm-mercadopago-module-' . $locale . '.mo'
 		);
 		load_plugin_textdomain( 'wpecomm-mercadopago-module', false, dirname( plugin_basename( __FILE__ ) ) . '/mercadopago-languages/' );
+	}
+
+	function callback_submit_options_basic() {
+		if ( ! empty( get_option( 'mercadopago_certified_clientid' ) ) && ! empty( get_option( 'mercadopago_certified_clientsecret' ) ) ) {
+			$mp = new MP(
+				get_option( 'mercadopago_certified_clientid' ),
+				get_option( 'mercadopago_certified_clientsecret' )
+			);
+			$access_token = $mp->get_access_token();
+			// analytics
+			if ( $access_token != null ) {
+				$checkout_basic = in_array( 'WPSC_Merchant_MercadoPago_Basic', get_option( 'custom_gateway_options' ) );
+				$infra_data = WPeComm_MercadoPago_Module::get_common_settings();
+				$infra_data['checkout_basic'] = ( $checkout_basic ? 'true' : 'false' );
+				$response = $mp->analytics_save_settings( $infra_data );
+			}
+		}
 	}
 
 }
@@ -146,13 +164,23 @@ function submit_mercadopago_basic() {
 	} else {
 		update_option('mercadopago_certified_exmethods', '');
 	}*/
-	if ( ! empty( $_POST['mercadopago_certified_twocards'] ) ) {
+	if ( isset( $_POST['mercadopago_certified_siteid'] ) ) {
 		$mp = new MP(
 			get_option( 'mercadopago_certified_clientid' ),
 			get_option( 'mercadopago_certified_clientsecret' )
 		);
-		$payment_split_mode = trim( $_POST['mercadopago_certified_twocards'] );
-		$response = $mp->set_two_cards_mode( $payment_split_mode );
+		$access_token = $mp->get_access_token();
+		// analytics
+		if ( $access_token != null ) {
+			$infra_data = WPeComm_MercadoPago_Module::get_common_settings();
+			$infra_data['mercado_envios'] = 'false';
+			$infra_data['two_cards'] = ( $_POST['mercadopago_certified_twocards'] == 'active' ? 'true' : 'false' );
+			$response = $mp->analytics_save_settings( $infra_data );
+		}
+		if ( $access_token != null && ! empty( $_POST['mercadopago_certified_twocards'] ) ) {
+			$payment_split_mode = trim( $_POST['mercadopago_certified_twocards'] );
+			$response = $mp->set_two_cards_mode( $payment_split_mode );
+		}
 	}
 	if (isset($_POST['mercadopago_certified_sandbox'])) {
 		update_option('mercadopago_certified_sandbox', trim($_POST['mercadopago_certified_sandbox']));
@@ -1030,6 +1058,7 @@ function payment_split_mode( $twocards ) {
 		array('value' => 'inactive', 'text' => __( 'Inactive', 'wpecomm-mercadopago-module' ) )
 	);
 
+	$select_twocards = '';
 	foreach ( $twocards_options as $op_twocards ) :
 		$selected = '';
 		if ( $op_twocards['value'] == $twocards ) :
