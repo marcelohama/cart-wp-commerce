@@ -104,7 +104,7 @@ Please, check our FAQ at: https://www.mercadopago.com.br/ajuda/
 
 == Changelog ==
 
-= v4.2.2 (17/11/2016) =
+= v4.2.2 (24/11/2016) =
 * Improvements
 	- Analytical analysis checking.
 
