@@ -43,10 +43,9 @@ class WPSC_Merchant_MercadoPago_Ticket extends wpsc_merchant {
 	}
 
    public static function callback_submit_options_ticket() {
-      if ( ! empty( get_option( 'mercadopago_ticket_accesstoken' ) ) ) {
-         $mp = new MP(
-            get_option( 'mercadopago_ticket_accesstoken' )
-         );
+      $accesstoken = get_option( 'mercadopago_ticket_accesstoken' );
+      if ( ! empty( $accesstoken ) ) {
+         $mp = new MP( $accesstoken );
          $get_request = $mp->get( "/users/me?access_token=" . get_option( 'mercadopago_ticket_accesstoken' ) );
          // analytics
          if ( isset( $get_request['response']['site_id'] ) ) {

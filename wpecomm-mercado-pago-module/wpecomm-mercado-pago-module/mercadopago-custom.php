@@ -42,10 +42,9 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
    }
 
    public static function callback_submit_options_custom() {
-      if ( ! empty( get_option( 'mercadopago_custom_accesstoken' ) ) ) {
-         $mp = new MP(
-            get_option( 'mercadopago_custom_accesstoken' )
-         );
+      $accesstoken = get_option( 'mercadopago_custom_accesstoken' );
+      if ( ! empty( $accesstoken ) ) {
+         $mp = new MP( $accesstoken );
          $get_request = $mp->get( "/users/me?access_token=" . get_option( 'mercadopago_custom_accesstoken' ) );
          // analytics
          if ( isset( $get_request['response']['site_id'] ) ) {

@@ -39,7 +39,6 @@ class WPSC_Merchant_MercadoPago_Basic extends wpsc_merchant {
 
 	function __construct() {
 		add_action( 'init', array( $this, 'load_plugin_textdomain_wpecomm' ) );
-		add_action( 'wpsc_submit_gateway_options', array( $this, 'callback_submit_options_basic' ) );
 	}
 
 	// Multi-language plugin
@@ -52,12 +51,11 @@ class WPSC_Merchant_MercadoPago_Basic extends wpsc_merchant {
 		load_plugin_textdomain( 'wpecomm-mercadopago-module', false, dirname( plugin_basename( __FILE__ ) ) . '/mercadopago-languages/' );
 	}
 
-	function callback_submit_options_basic() {
-		if ( ! empty( get_option( 'mercadopago_certified_clientid' ) ) && ! empty( get_option( 'mercadopago_certified_clientsecret' ) ) ) {
-			$mp = new MP(
-				get_option( 'mercadopago_certified_clientid' ),
-				get_option( 'mercadopago_certified_clientsecret' )
-			);
+	public static function callback_submit_options_basic() {
+		$client_id =  get_option( 'mercadopago_certified_clientid' );
+		$client_secret = get_option( 'mercadopago_certified_clientsecret' );
+		if ( ! empty( $client_id ) && ! empty( $client_secret ) ) {
+			$mp = new MP( $client_id, $client_secret );
 			$access_token = $mp->get_access_token();
 			// analytics
 			if ( $access_token != null ) {
@@ -70,6 +68,11 @@ class WPSC_Merchant_MercadoPago_Basic extends wpsc_merchant {
 	}
 
 }
+
+add_action(
+	'wpsc_submit_gateway_options',
+	array( 'WPSC_Merchant_MercadoPago_Basic', 'callback_submit_options_basic' )
+);
 
 /**
  * Saving of Mercado Pago Basic Checkout Settings
