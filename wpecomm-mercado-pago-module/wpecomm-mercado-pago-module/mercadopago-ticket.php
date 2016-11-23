@@ -42,7 +42,7 @@ class WPSC_Merchant_MercadoPago_Ticket extends wpsc_merchant {
     	parent::__construct( $purchase_id, $is_receiving );
 	}
 
-   function callback_submit_options_ticket() {
+   public static function callback_submit_options_ticket() {
       if ( ! empty( get_option( 'mercadopago_ticket_accesstoken' ) ) ) {
          $mp = new MP(
             get_option( 'mercadopago_ticket_accesstoken' )
@@ -525,6 +525,12 @@ function workaroundAmperSandBug_ticket( $link ) {
 function getImagePath_ticket( $image_name ) {
    return plugins_url( 'wpsc-merchants/mercadopago-images/' . $image_name, plugin_dir_path( __FILE__ ) );
 }
+
+// Called when saving the settings, to send analytics data
+add_action(
+   'wpsc_submit_gateway_options',
+   array( 'WPSC_Merchant_MercadoPago_Ticket', 'callback_submit_options_ticket' )
+);
 
 /*===============================================================================
    CHECKOUT FORM AND SETTINGS PAGE
@@ -1111,5 +1117,9 @@ function debugs_ticket() {
 	$showdebugs .= '</select>';
 	return $showdebugs;
 }
+
+/*===============================================================================
+   INSTANTIATIONS
+================================================================================*/
 
 ?>

@@ -29,8 +29,6 @@ $nzshpcrt_gateways[$num] = array(
    'internalname' => 'WPSC_Merchant_MercadoPago_Custom'
 );
 
-add_action( 'wpsc_submit_gateway_options', array( 'WPSC_Merchant_MercadoPago_Custom', 'callback_submit_options_custom' ) );
-
 class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
 
    var $name = '';
@@ -630,6 +628,12 @@ function workaroundAmperSandBug_custom( $link ) {
 function getImagePath_custom( $image_name ) {
    return plugins_url( 'wpsc-merchants/mercadopago-images/' . $image_name, plugin_dir_path( __FILE__ ) );
 }
+
+// Called when saving the settings, to send analytics data
+add_action(
+   'wpsc_submit_gateway_options',
+   array( 'WPSC_Merchant_MercadoPago_Custom', 'callback_submit_options_custom' )
+);
 
 /*===============================================================================
    CHECKOUT FORM AND SETTINGS PAGE
