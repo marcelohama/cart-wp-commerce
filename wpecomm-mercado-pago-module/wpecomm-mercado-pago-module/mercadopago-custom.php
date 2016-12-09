@@ -252,6 +252,9 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
          "` WHERE `sessionid`= " . $this->cart_data['session_id'] . " LIMIT 1"
          , ARRAY_A);
 
+      // indicates that the used method is WPSC_Merchant_MercadoPago_Custom
+      update_post_meta( $purchase_log['id'], '_used_gateway', 'WPSC_Merchant_MercadoPago_Custom' );
+
       // this grabs the customer info using the $purchase_log from the previous SQL query
       $usersql = "SELECT `" . WPSC_TABLE_SUBMITED_FORM_DATA . "`.value,
          `" . WPSC_TABLE_CHECKOUT_FORMS . "`.`name`,
@@ -480,6 +483,54 @@ class WPSC_Merchant_MercadoPago_Custom extends wpsc_merchant {
       load_plugin_textdomain( 'wpecomm-mercadopago-module', false, dirname( plugin_basename( __FILE__ ) ) . '/mercadopago-languages/' );
    }
 
+   public static function add_checkout_script_custom() {
+      if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_gateway_options' ) ) ) {
+         $payments = array();
+         $gateways = (array)get_option( 'custom_gateway_options' );
+         foreach ( $gateways as $g ) {
+            $payments[] = $g;
+         }
+         $payments = str_replace( '-', '_', implode( ', ', $payments ) );
+         $email = wp_get_current_user()->user_email;
+
+         echo '<script src="https://secure.mlstatic.com/modules/javascript/analytics.js"></script>
+            <script type="text/javascript">
+               var prev_handler = window.onload;
+               window.onload = function () {
+                  if (prev_handler) {
+                     prev_handler();
+                  }
+                  if (document.getElementById("wpsc_shopping_cart_container")) {
+                     var MA = ModuleAnalytics;
+                     MA.setPublicKey("' . get_option('mercadopago_custom_publickey') . '");
+                     MA.setPlatform("WPeCommerce");
+                     MA.setPlatformVersion("' . get_option( 'wpsc_version', '0' ) . '");
+                     MA.setModuleVersion("' . WPeComm_MercadoPago_Module::VERSION . '");
+                     MA.setPayerEmail("' . ( $email != null ? $email : "" ) . '");
+                     MA.setUserLogged( ' . ( empty( $email ) ? 0 : 1 ) . ' );
+                     MA.setInstalledModules("' . $payments . '");
+                     MA.post();
+                  }
+               };
+            </script>';
+      }
+   }
+
+   public static function update_checkout_status_custom( $purchase_log_id ) {
+      if ( get_post_meta( $purchase_log_id, '_used_gateway', true ) != 'WPSC_Merchant_MercadoPago_Custom' )
+         return;
+      if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_gateway_options' ) ) ) {
+         echo '<script src="https://secure.mlstatic.com/modules/javascript/analytics.js"></script>
+         <script type="text/javascript">
+            var MA = ModuleAnalytics;
+            MA.setPublicKey("' . get_option('mercadopago_custom_publickey') . '");
+            MA.setPaymentType("credit_card");
+            MA.setCheckoutType("custom");
+            MA.put();
+         </script>';
+      }
+   }
+
    /**
     * parse_gateway_notification method, receives data from the payment gateway
     * @access private
@@ -510,14 +561,21 @@ function _wpsc_filter_mercadopago_custom_merchant_customer_notification_raw_mess
 add_filter(
    'wpsc_purchase_log_customer_notification_raw_message',
    '_wpsc_filter_mercadopago_custom_merchant_customer_notification_raw_message',
-   10,
-   2
+   10, 2
 );
 add_filter(
    'wpsc_purchase_log_customer_html_notification_raw_message',
    '_wpsc_filter_mercadopago_custom_merchant_customer_notification_raw_message',
-   10,
-   2
+   10, 2
+);
+
+add_action(
+   'wpsc_bottom_of_shopping_cart',
+   array( 'WPSC_Merchant_MercadoPago_Custom', 'add_checkout_script_custom' )
+);
+add_action(
+   'wpsc_confirm_checkout',
+   array( 'WPSC_Merchant_MercadoPago_Custom', 'update_checkout_status_custom' )
 );
 
 /*===============================================================================

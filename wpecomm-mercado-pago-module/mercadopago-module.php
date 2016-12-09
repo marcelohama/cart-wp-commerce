@@ -8,7 +8,7 @@
  * Author URI: https://www.mercadopago.com.br/developers/
  * Developer: Marcelo T. Hama (marcelo.hama@mercadolibre.com)
  * Copyright: Copyright(c) MercadoPago [https://www.mercadopago.com]
- * Version: 4.2.2
+ * Version: 4.2.3
  * License: https://www.gnu.org/licenses/gpl.html GPL version 2 or higher
  * Text Domain: wpecomm-mercadopago-module
  * Domain Path: /languages/
@@ -16,7 +16,7 @@
 
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) {
-	exit;
+  exit;
 }
 
 // Check if class is already loaded
@@ -25,7 +25,7 @@ if ( !class_exists( 'WPeComm_MercadoPago_Module' ) ) :
 // WPeCommerce MercadoPago Module main class
 class WPeComm_MercadoPago_Module {
 
-  const VERSION = '4.2.2';
+  const VERSION = '4.2.3';
 
 	// Singleton design pattern
 	protected static $instance = null;
