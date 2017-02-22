@@ -1008,8 +1008,6 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Ticket', (array)get_option( 'custom_ga
 
 	$page_header =
 		'<head>
-			<link rel="stylesheet" id="twentysixteen-style-css"
-				href="https://modules-mercadopago.rhcloud.com/wp-content/themes/twentysixteen/style.css?ver=4.5.3" type="text/css" media="all">
 			<link rel="stylesheet" id="ticket-checkout-mercadopago" href="' .
 				plugins_url( 'wpsc-merchants/mercadopago-lib/custom_checkout_mercadopago.css', plugin_dir_path( __FILE__ ) ) .
 				'?ver=4.5.3" type="text/css" media="all">

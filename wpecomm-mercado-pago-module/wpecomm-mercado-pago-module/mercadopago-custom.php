@@ -1306,13 +1306,22 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
 				</div>
 			</div>
 
-			<div class="mp-box-inputs mp-col-100" style="padding:0px 36px 0px 36px;">
-				<label for="installments">' . $form_labels['form']['installments'] . (
-					(get_option('mercadopago_custom_currencyconversion') == "active") > 0 ?
-						" (" . $form_labels['form']['payment_converted'] . ")" : ""
-					) . ' <em>*</em>
-				</label>
-				<select id="installments" data-checkout="installments" name="mercadopago_custom[installments]"></select>
+			<div id="mp-box-installments" style="padding:0px 36px 0px 36px;">
+				<div class="mp-box-inputs mp-col-50" id="mp-box-installments-selector">
+					<label for="installments">' . $form_labels['form']['installments'] . (
+						(get_option('mercadopago_custom_currencyconversion') == "active") > 0 ?
+							" (" . $form_labels['form']['payment_converted'] . ")" : ""
+						) . ' <em>*</em>
+					</label>
+					<select id="installments" data-checkout="installments" name="mercadopago_custom[installments]"></select>
+				</div>
+				<div class="mp-box-inputs mp-col-50 mp-col-70" id="mp-box-input-tax-cft">
+					<label >&nbsp;</label>
+					<div id="mp-tax-cft-text"></div>
+				</div>
+				<div class="mp-box-inputs mp-col-100" id="mp-box-input-tax-tea">
+					<div id="mp-tax-tea-text"></div>
+				</div>
 			</div>
 
 			<div class="mp-box-inputs mp-line" style="padding:0px 36px 0px 36px;">
@@ -1383,8 +1392,6 @@ if ( in_array( 'WPSC_Merchant_MercadoPago_Custom', (array)get_option( 'custom_ga
 
 	$page_header =
 		'<head>
-			<link rel="stylesheet" id="twentysixteen-style-css"
-				href="https://modules-mercadopago.rhcloud.com/wp-content/themes/twentysixteen/style.css?ver=4.5.3" type="text/css" media="all">
 			<link rel="stylesheet" id="custom-checkout-mercadopago" href="' .
 				plugins_url( 'wpsc-merchants/mercadopago-lib/custom_checkout_mercadopago.css', plugin_dir_path( __FILE__ ) ) .
 				'?ver=4.5.3" type="text/css" media="all">
