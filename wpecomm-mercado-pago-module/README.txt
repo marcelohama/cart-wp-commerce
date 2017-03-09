@@ -104,7 +104,7 @@ Please, check our FAQ at: https://www.mercadopago.com.br/ajuda/
 
 == Changelog ==
 
-= v4.2.4 (??/??/2017) =
+= v4.2.4 (13/03/2017) =
 * Features
 	- Rollout to Uruguay. This plugin is now supporting Uruguay for Basic Checkout with its local language translations.
 * Improvements

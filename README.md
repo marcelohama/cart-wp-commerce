@@ -27,7 +27,7 @@ Offer a checkout fully customized to your brand experience with our simple-to-us
 * Accept Mercado Pago's discount coupons.
 * Improve conversion rate.
 
-*Available for Argentina, Brazil, Colombia, Mexico, Peru and Venezuela*
+*Available for Argentina, Brazil, Colombia, Mexico, Peru, Venezuela and Uruguay*
 
 **Basic Checkout**
 
@@ -39,7 +39,7 @@ Great for merchants who want to get going quickly and easily.
 * Accept tickets, bank transfer and account money in addition to cards.
 * Accept Mercado Pago's discount coupons.
 
-*Available for Argentina, Brazil, Chile, Colombia, Mexico, Peru and Venezuela*
+*Available for Argentina, Brazil, Chile, Colombia, Mexico, Peru, Venezuela and Uruguay*
 
 <a name="requirements"></a>
 ##Requirements##
@@ -131,6 +131,7 @@ On your store administration, go to *Settings > Store > Payments* tab. Click in 
 	* Mexico: https://www.mercadopago.com/mlm/account/credentials?type=basic
 	* Peru: https://www.mercadopago.com/mpe/account/credentials?type=basic
 	* Venezuela: https://www.mercadopago.com/mlv/account/credentials?type=basic
+	* Uruguay: https://www.mercadopago.com/mlu/account/credentials?type=basic
 
 3. **Checkout Options**: This part allows you to customize your general checkout fields;
 
@@ -177,6 +178,7 @@ On your store administration, go to *Settings > Store > Payments* tab. Click in 
 	* Mexico: https://www.mercadopago.com/mlm/account/credentials?type=custom
 	* Peru: https://www.mercadopago.com/mpe/account/credentials?type=custom
 	* Venezuela: https://www.mercadopago.com/mlv/account/credentials?type=custom
+	* Uruguay: https://www.mercadopago.com/mlu/account/credentials?type=custom
 
 3. **Checkout Options**: This part allows you to customize your general checkout fields;
 
